@@ -1,0 +1,54 @@
+body {
+    background-color: #01304F;
+    color: #A1A6AA;
+    font-family: 'Ubuntu Mono', monospace;
+    margin: 0 auto;
+    max-width: 800px;
+    font-size: 116%;
+}
+
+.title {
+    color: #F1F2F3;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 110%;
+    font-weight: 900;
+}
+
+.org-src-container{
+    background-color: #002237;
+    color: #FFFFFF;
+}
+
+.src {
+    border: none;
+    box-shadow: none;
+}
+
+pre.src::before {
+    background-color: #002237;
+    border: none;
+    color: #A1A6AA;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #CCCFD0;
+}
+
+a {
+    color: #F1F2F3;
+    text-decoration-style: wavy;
+}
+
+a:visited {
+    color: #A1A6AA;
+    text-decoration-style: dashed;
+}
+
+a:active {
+    color: #FFFFFF;
+}
+
+li {
+    margin: 0 0 3px 0;
+}

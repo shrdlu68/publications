@@ -1,0 +1,52 @@
+# -*- mode: org; fill-column: 80 -*-
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Starting somewhere: minimalist blogging with org-mode
+#+AUTHOR: Brian Kamotho
+#+DATE: <2019-08-29 Thu>
+
+I have been thinking of starting a blog for a while, mostly to blog about
+technical stuff. Somehow that conversation always turned into a /Brazil/-type
+personal bureacracy.
+
+Until I thought of using org-mode. I've never used it beyond note-taking, and
+even then I've only used a small subset of its features. Why org-mode? I
+suspect, ultimately, it is because of a severe case of NIH-syndrome and because
+it looked like a fun and interesting way of doing it.
+
+This very document started as a prototype to check how well this would work. You
+wouldn't be reading this if I hadn't liked the results. One of my primary
+concerns, of course, was code highlighting, so I quickly pasted some code into
+the document to test it. Pay no particular attention to it.
+
+#+BEGIN_SRC lisp
+  (macroexpand-1 '(with-open-file (stream "/dev/urandom" :element-type 'octet)
+		   (read-byte stream)))
+
+  ;; Macroexpansion:
+
+  (LET ((STREAM (OPEN "/dev/urandom" :ELEMENT-TYPE 'OCTET)) (#:G482 T))
+    (UNWIND-PROTECT
+	(MULTIPLE-VALUE-PROG1 (PROGN (READ-BYTE STREAM)) (SETQ #:G482 NIL))
+      (WHEN STREAM (CLOSE STREAM :ABORT #:G482))))
+#+END_SRC
+
+It was exactly what I wanted. There were a few things I had to do though:
+
+  - I use emacs without X, probably because when I started using emacs I didn't
+    have a powerful machine.  I like my terminals with a dark background and
+    light foreground, but org-mode was exporting the html document the opposite
+    of that. I assumed that it would detect what my themes look like and it
+    would automatically match that, like [[https://github.com/hniksic/emacs-htmlize][htmlize]] does.  That turned out not to
+    be the case, so I asked on #emacs how to deal with this (I hadn't even read
+    the docs at this point), and was promptly pointed in the correct direction,
+    which was using a custom stylesheet. That takes all of one line:
+
+    ~#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />~
+
+    Now that I had a custom style sheet, I went ahead and made further
+    customizations.  I'm not done exploring the aesthetics, but I've settled on
+    something I like for now.
+
+I still haven't refined everything, but the point was to start somewhere.
