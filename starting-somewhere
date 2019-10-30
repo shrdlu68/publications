@@ -32,16 +32,15 @@ the document to test it. Pay no particular attention to it.
       (WHEN STREAM (CLOSE STREAM :ABORT #:G482))))
 #+END_SRC
 
-It was exactly what I wanted. There were a few things I had to do though:
+Good enough. And now the inspiration for the domain name should be apparent, for
+the non-lisers, or the lispers who are not commoners. There were a few things I
+had to do though:
 
-  - I use emacs without X, probably because when I started using emacs I didn't
-    have a powerful machine.  I like my terminals with a dark background and
-    light foreground, but org-mode was exporting the html document the opposite
-    of that. I assumed that it would detect what my themes look like and it
-    would automatically match that, like [[https://github.com/hniksic/emacs-htmlize][htmlize]] does.  That turned out not to
-    be the case, so I asked on #emacs how to deal with this (I hadn't even read
-    the docs at this point), and was promptly pointed in the correct direction,
-    which was using a custom stylesheet. That takes all of one line:
+  - I expected org-mode to automagically use my themes when exporting, like
+    [[https://github.com/hniksic/emacs-htmlize][htmlize]] does.  That turned out not to be the case, so I asked on #emacs how
+    to deal with this (I hadn't even read the docs at this point), and was
+    promptly pointed in the correct direction, which was using a custom
+    stylesheet. That takes all of one line:
 
     ~#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />~
 
@@ -49,4 +48,6 @@ It was exactly what I wanted. There were a few things I had to do though:
     customizations.  I'm not done exploring the aesthetics, but I've settled on
     something I like for now.
 
-I still haven't refined everything, but the point was to start somewhere.
+I still haven't refined everything, and I'm running all this on Gnu Guix, a
+system I don't quite understand yet. That's a story for another day, the point
+was to start somewhere.

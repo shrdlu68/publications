@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-10-29 Tue 20:01 -->
+<!-- 2019-10-30 Wed 20:29 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Starting somewhere: minimalist blogging with org-mode</title>
@@ -257,32 +257,31 @@ the document to test it. Pay no particular attention to it.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-lisp">(macroexpand-1 '(<span style="color: #00ffff;">with-open-file</span> (stream <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:element-type</span> 'octet)
+<pre class="src src-lisp">(macroexpand-1 '(<span style="color: #a020f0;">with-open-file</span> (stream <span style="color: #8b2252;">"/dev/urandom"</span> <span style="color: #483d8b;">:element-type</span> 'octet)
                  (read-byte stream)))
 
-<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Macroexpansion:</span>
+<span style="color: #b22222;">;; </span><span style="color: #b22222;">Macroexpansion:</span>
 
-(<span style="color: #00ffff;">LET</span> ((STREAM (OPEN <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:ELEMENT-TYPE</span> 'OCTET)) (#<span style="color: #b0c4de;">:G482</span> T))
-  (<span style="color: #00ffff;">UNWIND-PROTECT</span>
-      (<span style="color: #00ffff;">MULTIPLE-VALUE-PROG1</span> (<span style="color: #00ffff;">PROGN</span> (READ-BYTE STREAM)) (SETQ #<span style="color: #b0c4de;">:G482</span> NIL))
-    (<span style="color: #00ffff;">WHEN</span> STREAM (CLOSE STREAM <span style="color: #b0c4de;">:ABORT</span> #<span style="color: #b0c4de;">:G482</span>))))
+(<span style="color: #a020f0;">LET</span> ((STREAM (OPEN <span style="color: #8b2252;">"/dev/urandom"</span> <span style="color: #483d8b;">:ELEMENT-TYPE</span> 'OCTET)) (#<span style="color: #483d8b;">:G482</span> T))
+  (<span style="color: #a020f0;">UNWIND-PROTECT</span>
+      (<span style="color: #a020f0;">MULTIPLE-VALUE-PROG1</span> (<span style="color: #a020f0;">PROGN</span> (READ-BYTE STREAM)) (SETQ #<span style="color: #483d8b;">:G482</span> NIL))
+    (<span style="color: #a020f0;">WHEN</span> STREAM (CLOSE STREAM <span style="color: #483d8b;">:ABORT</span> #<span style="color: #483d8b;">:G482</span>))))
 </pre>
 </div>
 
 <p>
-It was exactly what I wanted. There were a few things I had to do though:
+Good enough. And now the inspiration for the domain name should be apparent, for
+the non-lisers, or the lispers who are not commoners. There were a few things I
+had to do though:
 </p>
 
 <ul class="org-ul">
 <li><p>
-I use emacs without X, probably because when I started using emacs I didn't
-have a powerful machine.  I like my terminals with a dark background and
-light foreground, but org-mode was exporting the html document the opposite
-of that. I assumed that it would detect what my themes look like and it
-would automatically match that, like <a href="https://github.com/hniksic/emacs-htmlize">htmlize</a> does.  That turned out not to
-be the case, so I asked on #emacs how to deal with this (I hadn't even read
-the docs at this point), and was promptly pointed in the correct direction,
-which was using a custom stylesheet. That takes all of one line:
+I expected org-mode to automagically use my themes when exporting, like
+<a href="https://github.com/hniksic/emacs-htmlize">htmlize</a> does.  That turned out not to be the case, so I asked on #emacs how
+to deal with this (I hadn't even read the docs at this point), and was
+promptly pointed in the correct direction, which was using a custom
+stylesheet. That takes all of one line:
 </p>
 
 <p>
@@ -297,13 +296,15 @@ something I like for now.
 </ul>
 
 <p>
-I still haven't refined everything, but the point was to start somewhere.
+I still haven't refined everything, and I'm running all this on Gnu Guix, a
+system I don't quite understand yet. That's a story for another day, the point
+was to start somewhere.
 </p>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2019-08-29 Thu 00:00</p>
 <p class="author">Author: Brian Kamotho</p>
-<p class="date">Created: 2019-10-29 Tue 20:01</p>
+<p class="date">Created: 2019-10-30 Wed 20:29</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
