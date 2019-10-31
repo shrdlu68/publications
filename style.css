@@ -7,6 +7,14 @@ body {
     font-size: 116%;
 }
 
+@media only screen and (max-device-width: 480px) {
+    body {
+	margin: 0 auto;
+	max-width: none;
+	font-size: small;
+    }
+}
+
 .title {
     color: #F1F2F3;
     text-align: center;
@@ -18,6 +26,7 @@ body {
 .org-src-container{
     background-color: #002237;
     color: #FFFFFF;
+    overflow-x: scroll
 }
 
 .src, pre.example {
