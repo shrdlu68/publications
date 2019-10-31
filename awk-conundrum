@@ -7,7 +7,7 @@
 #+AUTHOR: Brian Kamotho
 #+DATE: <2019-10-30 Thu>
 
-It started with an elementary task. Given a scv file like this one:
+It started with an elementary task. Given a csv file like this one:
 
 #+BEGIN_EXAMPLE
 first_name,last_name,phone_number
@@ -36,7 +36,7 @@ something might be wrong with Gnu Awk, so I tried Busybox awk and Nawk. They
 were all consistent, so it couldn't be a bug.
 
 I tried ~"%s,%s,*%s*\n"~ instead, thinking that it could be the double
-quotes. Same thing, only with asterists.
+quotes. Same thing, only with asterisks.
 
 Next, I tried ~"%s,%s,*%s\n"~. This one worked as expected:
 #+BEGIN_EXAMPLE
