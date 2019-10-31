@@ -3,10 +3,10 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-10-30 Wed 21:42 -->
+<!-- 2019-10-31 Thu 12:22 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Starting somewhere: minimalist blogging with org-mode</title>
+<title>An Awk Conundrum</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brian Kamotho" />
 <style type="text/css">
@@ -235,76 +235,19 @@ for the JavaScript code in this tag.
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content">
-<h1 class="title">Starting somewhere: minimalist blogging with org-mode</h1>
+<h1 class="title">An Awk Conundrum</h1>
 <p>
-I have been thinking of starting a blog for a while, mostly to blog about
-technical stuff. Somehow that conversation always turned into a <i>Brazil</i>-type
-personal bureacracy.
+Welcome, there isn't much here right now:
 </p>
-
-<p>
-Until I thought of using org-mode. I've never used it beyond note-taking, and
-even then I've only used a small subset of its features. Why org-mode? I
-suspect, ultimately, it is because of a severe case of NIH-syndrome and because
-it looked like a fun and interesting way of doing it.
-</p>
-
-<p>
-This very document started as a prototype to check how well this would work. You
-wouldn't be reading this if I hadn't liked the results. One of my primary
-concerns, of course, was code highlighting, so I quickly pasted some code into
-the document to test it. Pay no particular attention to it.
-</p>
-
-<div class="org-src-container">
-<pre class="src src-lisp">(macroexpand-1 '(<span style="color: #00ffff;">with-open-file</span> (stream <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:element-type</span> 'octet)
-                 (read-byte stream)))
-
-<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Macroexpansion:</span>
-
-(<span style="color: #00ffff;">LET</span> ((STREAM (OPEN <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:ELEMENT-TYPE</span> 'OCTET)) (#<span style="color: #b0c4de;">:G482</span> T))
-  (<span style="color: #00ffff;">UNWIND-PROTECT</span>
-      (<span style="color: #00ffff;">MULTIPLE-VALUE-PROG1</span> (<span style="color: #00ffff;">PROGN</span> (READ-BYTE STREAM)) (SETQ #<span style="color: #b0c4de;">:G482</span> NIL))
-    (<span style="color: #00ffff;">WHEN</span> STREAM (CLOSE STREAM <span style="color: #b0c4de;">:ABORT</span> #<span style="color: #b0c4de;">:G482</span>))))
-</pre>
-</div>
-
-<p>
-Good enough. And now the inspiration for the domain name should be apparent, for
-the non-lisers, or the lispers who are not commoners. There were a few things I
-had to do though:
-</p>
-
 <ul class="org-ul">
-<li><p>
-I expected org-mode to automagically use my themes when exporting, like
-<a href="https://github.com/hniksic/emacs-htmlize">htmlize</a> does.  That turned out not to be the case, so I asked on #emacs how
-to deal with this (I hadn't even read the docs at this point), and was
-promptly pointed in the correct direction, which was using a custom
-stylesheet. That takes all of one line:
-</p>
-
-<p>
-<code>#+HTML_HEAD: &lt;link rel="stylesheet" type="text/css" href="style1.css" /&gt;</code>
-</p>
-
-<p>
-Now that I had a custom style sheet, I went ahead and made further
-customizations.  I'm not done exploring the aesthetics, but I've settled on
-something I like for now.
-</p></li>
+<li>First post: <a href="https://unwindprotect.com/starting-somewhere">Starting somewhere</a></li>
+<li>Remember carriage returns? <a href="https://unwindprotect.com/awk-conundrum">An Awk conundrum</a></li>
 </ul>
-
-<p>
-I still haven't refined everything, and I'm running all this on Gnu Guix, a
-system I don't quite understand yet. That's a story for another day, the point
-was to start somewhere.
-</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2019-08-29 Thu 00:00</p>
+<p class="date">Date: 2019-10-30 Wed 00:00</p>
 <p class="author">Author: Brian Kamotho</p>
-<p class="date">Created: 2019-10-30 Wed 21:42</p>
+<p class="date">Created: 2019-10-31 Thu 12:22</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

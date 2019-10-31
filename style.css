@@ -20,9 +20,13 @@ body {
     color: #FFFFFF;
 }
 
-.src {
+.src, pre.example {
     border: none;
     box-shadow: none;
+}
+
+pre.example {
+    background-color: #012842;
 }
 
 pre.src::before {

@@ -1,0 +1,244 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: An Awk Conundrum
+#+AUTHOR: Brian Kamotho
+#+DATE: <2019-10-30 Thu>
+
+It started with an elementary task. Given a scv file like this one:
+
+#+BEGIN_EXAMPLE
+first_name,last_name,phone_number
+William,Robert,2547123456
+Mary,Jane,2547123456
+John,Michael,2547123456
+#+END_EXAMPLE
+
+Quote the phone numbers in double quotes. This should do it:
+#+BEGIN_SRC awk
+BEGIN {FS=","; OFS=","}
+NR > 1 {printf("%s,%s,\"%s\"\n", $1, $2, $3)}
+#+END_SRC
+
+This is what I got instead:
+
+#+BEGIN_EXAMPLE
+"illiam,Robert,"2547123456
+"ary,Jane,"2547123456
+"ohn,Michael,"2547123456
+#+END_EXAMPLE
+
+Strange. I thought I had missed something about how Awk's printf works, so I
+scoured the docs again. Maybe something about double quotes. No luck. I thought
+something might be wrong with Gnu Awk, so I tried Busybox awk and Nawk. They
+were all consistent, so it couldn't be a bug.
+
+I tried ~"%s,%s,*%s*\n"~ instead, thinking that it could be the double
+quotes. Same thing, only with asterists.
+
+Next, I tried ~"%s,%s,*%s\n"~. This one worked as expected:
+#+BEGIN_EXAMPLE
+William,Robert,*2547123456
+Mary,Jane,*2547123456
+John,Michael,*2547123456
+#+END_EXAMPLE
+
+I thought it must be the character after the format specifier, so I tried
+~"%s,%s,%s*\n"~:
+#+BEGIN_EXAMPLE
+*illiam,Robert,2547123456
+*ary,Jane,2547123456
+*ohn,Michael,2547123456
+#+END_EXAMPLE
+
+It can't be. To test the hypothesis, I tried ~"%s,%s*\n"~, and it worked as
+expected:
+#+BEGIN_EXAMPLE
+William,Robert
+Mary,Jane
+John,Michael
+#+END_EXAMPLE
+
+Alright, so it's something to do with the phone number? I was getting impatient,
+and this was supposed to be easy and someone needed those phone numbers quoted.
+So I spun off some ad-hoc python to do it, planning to figure out what was going
+on with Awk later. It was also kinda embarrassing. Anyway, the python that saved
+the day:
+#+BEGIN_SRC python
+import csv
+import os
+
+with open(
+    "query_result.csv", mode="r", newline=""
+) as inputfile, open("out.csv", mode="w+", newline="") as outputfile:
+    reader = csv.reader(
+        inputfile,
+        quoting=csv.QUOTE_MINIMAL,
+        doublequote=True,
+        lineterminator="\n",
+        strict=True,
+    )
+    for row in reader:
+        row[2] = '"%s"' % (row[2])
+        outputfile.write("%s,%s,%s\n" % (row[0], row[1], row[2]))
+#+END_SRC
+
+Later, I came back to this problem, and I still couldn't figure it out so I
+emailed a friend. He tried it on his own sample input and couldn't reproduce
+what I was seeing. I sent him my sample input and he quickly and colorfully
+validated my sanity.
+
+We started hypothesizing. He discovered that formatting the phone number as an
+integer (~"%s,%s,*%d*\n"~) produced the expected result:
+#+BEGIN_EXAMPLE
+William,Robert,*2547123456*
+Mary,Jane,*2547123456*
+John,Michael,*2547123456*
+#+END_EXAMPLE
+That only deepened the mystery. Why couldn't he reproduce this with his own
+sample input, which actually had two integer columns?
+
+In my early attempts to sanitize the output, I had tried copying the buffer into
+another file in emacs and noticed I couldn't reproduce the behavior with the new
+file. I suspected emacs was changing something. Meanwhile, my friend had figured
+it out: it was carriage returns. Curious about what could be different between
+his sample file and mine, he had opened my file in a hex editor.
+
+Sure enough, ~cat -v~ showed the carriage returns in the original file:
+#+BEGIN_EXAMPLE
+first_name,last_name,phone_number^M
+William,Robert,2547123456^M
+Mary,Jane,2547123456^M
+John,Michael,2547123456^M
+#+END_EXAMPLE
+
+Piping the output of awk through ~cat -v~ also showed what awk was printing:
+#+BEGIN_EXAMPLE
+William,Robert,*2547123456^M*
+Mary,Jane,*2547123456^M*
+John,Michael,*2547123456^M*
+#+END_EXAMPLE
+
+So this had nothing to do with Awk at all! This explains why formatting the
+phone numbers as integers doesn't produce garbled output: the ~\r~ isn't
+printed. It also explains why the file I created in emacs didn't produce garbled
+output: the default ~buffer-file-coding-system~ is ~undecided-unix~. But why
+didn't the python script above produce garbled output as well?
+
+With ~newline=""~ and ~lineterminator="\n"~, it ought to be parsing the file
+just like awk is. I'm also printing the phone number as a string, so what gives?
+
+#+BEGIN_SRC python
+>>> import os
+>>> import csv
+>>> inputfile = open("sample.csv", mode="r", newline="")
+>>> reader = csv.reader(
+>>>     inputfile,
+>>>     quoting=csv.QUOTE_MINIMAL,
+>>>     doublequote=True,
+>>>     lineterminator="\n",
+>>>     strict=True,
+>>> )
+>>> rows = []
+>>> for row in reader:
+>>>     rows.append("%s,%s,*%s*\n" % (row[0], row[1], row[2]))
+>>> rows
+>>> [
+>>>     "first_name,last_name,*phone_number*\n",
+>>>     "William,Robert,*2547123456*\n",
+>>>     "Mary,Jane,*2547123456*\n",
+>>>     "John,Michael,*2547123456*\n",
+>>> ]
+>>> 
+#+END_SRC
+
+What happened to the carriage return? The answer is at the bottom of the docs
+for the csv module:
+#+BEGIN_EXAMPLE
+...It should always be safe to specify newline='', since the csv module does its
+own (universal) newline handling.
+#+END_EXAMPLE
+
+The glossary describes universal newline handling as:
+#+BEGIN_EXAMPLE
+A manner of interpreting text streams in which all of the following are
+recognized as ending a line: the Unix end-of-line convention '\n', the Windows
+convention '\r\n', and the old Macintosh convention '\r'. See PEP 278 and PEP
+3116, as well as bytes.splitlines() for an additional use.
+#+END_EXAMPLE
+
+That's...neat. Can we make Awk do universal newline handling?
+We can, in Gawk at least:
+#+BEGIN_EXAMPLE
+The ability for RS to be a regular expression is a gawk extension. In most other
+awk implementations, or if gawk is in compatibility mode (see section
+Command-Line Options), just the first character of RS’s value is used.
+#+END_EXAMPLE
+Hence:
+#+BEGIN_SRC awk
+BEGIN {FS=","; OFS=","; RS="\r\n|\r|\n"}
+NR > 1 {printf("%s,%s,*%s*\n", $1, $2, $3)}
+#+END_SRC
+#+BEGIN_EXAMPLE
+William,Robert,*2547123456*
+Mary,Jane,*2547123456*
+John,Michael,*2547123456*
+#+END_EXAMPLE
+
+Could it be that simple? I was curious if the order mattered, so I switched the
+regex to ~\r|\n|\r\n~. Same result as above. I thought the carriage return would
+be matched first. That's what ~man perlre~ says, at least:
+
+#+BEGIN_EXAMPLE
+Alternatives are tried from left to right, so the first alternative found for
+which the entire expression matches, is the one that is chosen. This means that
+alternatives are not necessarily greedy. For example: when matching "foo|foot"
+against "barefoot", only the "foo" part will match, as that is the first
+alternative tried, and it successfully matches the target string.
+#+END_EXAMPLE
+
+I switched the regex to ~"\r|\n"~:
+#+BEGIN_EXAMPLE
+,,**
+William,Robert,*2547123456*
+,,**
+Mary,Jane,*2547123456*
+,,**
+John,Michael,*2547123456*
+,,**
+#+END_EXAMPLE
+
+Interesting. Switched to ~"\n|\r"~. Same thing.  Awk's regex is not
+perl-compatible.
+#+BEGIN_EXAMPLE
+$ awk '{match($0, /foo|foot/); printf("%s\n", substr($0, RSTART, RLENGTH))}' <<<football
+foot
+$ awk '{match($0, /foot|foo/); printf("%s\n", substr($0, RSTART, RLENGTH))}' <<<football
+foot
+$ grep -Po 'foo|foot' <<<football
+foo
+$ grep -Eo 'foo|foot' <<<football
+foot
+#+END_EXAMPLE
+
+The documentation explains it:
+#+BEGIN_EXAMPLE
+The alternation applies to the largest possible regexps on either side. 
+#+END_EXAMPLE
+
+It also matches the leftmost longest string. So with ~\r|\n|\r\n~, it would
+match ~\r\n~ first, so we'd parse files encoded in the Windows convention
+properly.  Therefore this /is/ a working universal newline handling
+implementation.
+
+-----
+
+In retrospect, it should have been obvious it was carriage returns, and there
+were clues all over the place. But I've used Gnu/Linux exclusively for so long I
+forgot there were alternative end-of-line conventions.
+
+-----
+
+Thanks to [[https://kmwenja.github.io/][kmenja]] for validating my sanity and solving the riddle!
