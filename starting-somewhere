@@ -1,10 +1,12 @@
 # -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: timestamp:nil
 #+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 #+TITLE: Starting somewhere: minimalist blogging with org-mode
 #+AUTHOR: Brian Kamotho
-#+DATE: <2019-08-29 Thu>
+#+DATE: 2019-10-30
 
 I have been thinking of starting a blog for a while, mostly to blog about
 technical stuff. Somehow that conversation always turned into a /Brazil/-type

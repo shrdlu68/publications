@@ -1,11 +1,12 @@
 # -*- mode: org; fill-column: 80 -*-
 #+OPTIONS: ^:nil
 #+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/starting-somewhere
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 #+TITLE: An Awk Conundrum
 #+AUTHOR: Brian Kamotho
-#+DATE: <2019-10-30 Thu>
+#+DATE: 2019-10-30
 
 It started with an elementary task. Given a csv file like this one:
 
@@ -156,26 +157,26 @@ just like awk is. I'm also printing the phone number as a string, so what gives?
 
 What happened to the carriage return? The answer is at the bottom of the docs
 for the csv module:
-#+BEGIN_EXAMPLE
+#+BEGIN_QUOTE
 ...It should always be safe to specify newline='', since the csv module does its
 own (universal) newline handling.
-#+END_EXAMPLE
+#+END_QUOTE
 
 The glossary describes universal newline handling as:
-#+BEGIN_EXAMPLE
+#+BEGIN_QUOTE
 A manner of interpreting text streams in which all of the following are
 recognized as ending a line: the Unix end-of-line convention '\n', the Windows
 convention '\r\n', and the old Macintosh convention '\r'. See PEP 278 and PEP
 3116, as well as bytes.splitlines() for an additional use.
-#+END_EXAMPLE
+#+END_QUOTE
 
 That's...neat. Can we make Awk do universal newline handling?
 We can, in Gawk at least:
-#+BEGIN_EXAMPLE
+#+BEGIN_QUOTE
 The ability for RS to be a regular expression is a gawk extension. In most other
 awk implementations, or if gawk is in compatibility mode (see section
 Command-Line Options), just the first character of RS’s value is used.
-#+END_EXAMPLE
+#+END_QUOTE
 Hence:
 #+BEGIN_SRC awk
 BEGIN {FS=","; OFS=","; RS="\r\n|\r|\n"}
@@ -191,13 +192,13 @@ Could it be that simple? I was curious if the order mattered, so I switched the
 regex to ~\r|\n|\r\n~. Same result as above. I thought the carriage return would
 be matched first. That's what ~man perlre~ says, at least:
 
-#+BEGIN_EXAMPLE
+#+BEGIN_QUOTE
 Alternatives are tried from left to right, so the first alternative found for
 which the entire expression matches, is the one that is chosen. This means that
 alternatives are not necessarily greedy. For example: when matching "foo|foot"
 against "barefoot", only the "foo" part will match, as that is the first
 alternative tried, and it successfully matches the target string.
-#+END_EXAMPLE
+#+END_QUOTE
 
 I switched the regex to ~"\r|\n"~:
 #+BEGIN_EXAMPLE

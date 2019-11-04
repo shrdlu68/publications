@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2019-10-31 Thu 23:09 -->
+<!-- 2019-11-04 Mon 10:31 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>An Awk Conundrum</title>
@@ -228,10 +228,32 @@ for the JavaScript code in this tag.
  }
 /*]]>*///-->
 </script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href=""> UP </a>
+ <a accesskey="h" href="https://unwindprotect.com/starting-somewhere"> UP </a>
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content">
@@ -424,30 +446,36 @@ just like awk is. I'm also printing the phone number as a string, so what gives?
 What happened to the carriage return? The answer is at the bottom of the docs
 for the csv module:
 </p>
-<pre class="example">
-...It should always be safe to specify newline='', since the csv module does its
+<blockquote>
+<p>
+&#x2026;It should always be safe to specify newline='', since the csv module does its
 own (universal) newline handling.
-</pre>
+</p>
+</blockquote>
 
 <p>
 The glossary describes universal newline handling as:
 </p>
-<pre class="example">
+<blockquote>
+<p>
 A manner of interpreting text streams in which all of the following are
 recognized as ending a line: the Unix end-of-line convention '\n', the Windows
 convention '\r\n', and the old Macintosh convention '\r'. See PEP 278 and PEP
 3116, as well as bytes.splitlines() for an additional use.
-</pre>
+</p>
+</blockquote>
 
 <p>
 That's&#x2026;neat. Can we make Awk do universal newline handling?
 We can, in Gawk at least:
 </p>
-<pre class="example">
+<blockquote>
+<p>
 The ability for RS to be a regular expression is a gawk extension. In most other
 awk implementations, or if gawk is in compatibility mode (see section
 Command-Line Options), just the first character of RS’s value is used.
-</pre>
+</p>
+</blockquote>
 <p>
 Hence:
 </p>
@@ -468,13 +496,15 @@ regex to <code>\r|\n|\r\n</code>. Same result as above. I thought the carriage r
 be matched first. That's what <code>man perlre</code> says, at least:
 </p>
 
-<pre class="example">
+<blockquote>
+<p>
 Alternatives are tried from left to right, so the first alternative found for
 which the entire expression matches, is the one that is chosen. This means that
 alternatives are not necessarily greedy. For example: when matching "foo|foot"
 against "barefoot", only the "foo" part will match, as that is the first
 alternative tried, and it successfully matches the target string.
-</pre>
+</p>
+</blockquote>
 
 <p>
 I switched the regex to <code>"\r|\n"</code>:
@@ -533,10 +563,8 @@ Thanks to <a href="https://kmwenja.github.io/">kmwenja</a> for validating my san
 </p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2019-10-30 Wed 00:00</p>
+<p class="date">Date: 2019-10-30</p>
 <p class="author">Author: Brian Kamotho</p>
-<p class="date">Created: 2019-10-31 Thu 23:09</p>
-<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
 </html>

@@ -9,7 +9,6 @@ body {
 
 @media only screen and (max-device-width: 480px) {
     body {
-	margin: 0 auto;
 	max-width: none;
 	font-size: small;
     }
@@ -26,16 +25,22 @@ body {
 .org-src-container{
     background-color: #002237;
     color: #FFFFFF;
-    overflow-x: scroll
+    overflow-x: auto;
 }
 
 .src, pre.example {
     border: none;
     box-shadow: none;
+    margin-left: 0px;
+    margin-right: 0px;
 }
 
-pre.example {
+pre.example, blockquote {
     background-color: #012842;
+}
+
+blockquote > p {
+    margin: 5px;
 }
 
 pre.src::before {
