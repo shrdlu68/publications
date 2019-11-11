@@ -71,7 +71,7 @@ effects may cascade just beyond your code-base.
 
 Now that we've established we can't always use logical replication for
 datarwarehousing, let's get back to evaluating the feasibility of
-using FDW instead. We establsihed the we need to replicate the
+using FDW instead. We establsihed that we need to replicate the
 databases we use for transactional processing. We could either have
 read-only nodes dedicated to analytical processing or we could just
 use the same pool of nodes for both purposes, balancing the load
@@ -103,7 +103,7 @@ issue.
 
 Asynchronous multimaster replication also sounds like it would work,
 and since we're only sending read-only queries to the replica(s), we
-don't have to hve any conflict-resolution rules.
+don't have to have any conflict-resolution rules.
 
 Assuming all this works, somehow, and all the assumptions hold
 true, this will take a lot of work to scale, and may hit a
