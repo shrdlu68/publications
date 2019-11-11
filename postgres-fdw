@@ -1,0 +1,180 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/awk-conundrum
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Datawarehousing using Postgres FDW
+#+AUTHOR: Brian Kamotho
+#+DATE: 2019-11-10
+
+Most blog posts are about successful application of certain
+technologies or techniques. This one is somewhat like a study that
+proves the null hypothesis - it's not exciting. Here I show one
+potential solution for datawarehousing, but one that may not scale or
+may not be feasible at all. I am essentially documenting a bad idea.
+
+Datawarehousing is essentially collating data to facilitate analytical
+processing - BI, Data Science, Machine Learning, etc. Anyone with data
+across several databases needs to do it to uniformly process the data.
+
+One approach is to have an ETL/ELT (extract, transform, load) job that
+syncs data between these sources into one database. An alternative
+approach is to have some means of treating the data as if it were in
+one database, through some kind of unifying layer.  Enter Postgres [[https://wiki.postgresql.org/wiki/Foreign_data_wrappers][FDW]]
+(Foreign Data Wrappers).
+
+I focus primarily on the case where the data sources are in Postgres:
+#+BEGIN_EXAMPLE
+The postgres-fdw module provides the foreign-data wrapper
+postgres-fdw, which can be used to access data stored in external
+PostgreSQL servers.
+#+END_EXAMPLE
+
+There you go. You don't need any ETL/ELT middleware. If your foreign
+databases happen to be Postgres, you're left with an optimization
+problem, and essentially this solution will work for any amount of
+data that Postgres can handle, depending on your needs. It might be
+slow, but for certain amounts of data I suspect no silver bullet
+exists.
+
+Using the same database instance for both transactional processsing
+and analytical processing needs some careful planning, since latency
+is not as critical for analytical queries as it is for transactional
+processing. This calls for replication.
+
+Hold on - if your data sources happen to be in Postgres, why bother
+with FDW at all? Why not just collate your databases with replication?
+You could replicate your tables from different databases into a single
+database. It's in fact one of the stated uses of logical replication
+in the Postgres [[https://www.postgresql.org/docs/10/logical-replication.html][docs]]:
+#+BEGIN_EXAMPLE
+- Consolidating multiple databases into a single one (for example for
+  analytical purposes).
+#+END_EXAMPLE
+
+It sounds rather straightforward. There is only one thing to worry
+about: name conflicts. Is it possible to replicate table ~foo~ from
+database ~bar~ and table ~foo~ from database ~baz~ into the same
+destination database? No [[https://www.postgresql.org/docs/current/logical-replication-subscription.html#LOGICAL-REPLICATION-SUBSCRIPTION-SLOT][it isn't]]:
+#+BEGIN_EXAMPLE
+The tables are matched between the publisher and the subscriber using
+the fully qualified table name. Replication to differently-named
+tables on the subscriber is not supported.
+#+END_EXAMPLE
+If your table names are all unique, then you're in luck - you only
+have to create some kind of convention in your team to ensure this
+continues to be the case for tables created in future. If not, your
+only option is to rename your tables/schemas. Renaming tables is not a
+trivial undertaking, and may in fact be infeasible for some as the
+effects may cascade just beyond your code-base.
+
+Now that we've established we can't always use logical replication for
+datarwarehousing, let's get back to evaluating the feasibility of
+using FDW instead. We establsihed the we need to replicate the
+databases we use for transactional processing. We could either have
+read-only nodes dedicated to analytical processing or we could just
+use the same pool of nodes for both purposes, balancing the load
+across the nodes.
+
+If we choose to use dedicated nodes for analytical processing, what
+kind of replication should we use? There are [[https://www.postgresql.org/docs/9.1/different-replication-solutions.html][several options]] for
+replication.
+
+We don't need to write data to the replica - in fact we may not want
+to, so we want master-slave replication rather than
+multi-master. However, the docs do mention something interesting:
+#+BEGIN_EXAMPLE
+A master-standby replication setup sends all data modification queries
+to the master server. The master server asynchronously sends data
+changes to the standby server. The standby can answer read-only
+queries while the master server is running. The standby server is
+ideal for data warehouse queries.
+#+END_EXAMPLE
+We're not particularly interested in replicating from our replica(s),
+but why do the docs recommend this mode of replication for
+datawarehousing? The only reason I can think of is if this mode avoids
+the [[https://www.postgresql.org/docs/current/hot-standby.html#HOT-STANDBY-CONFLICT][query conflicts]] issue. It turns out querying a hot-standby replica
+is tricky, I learned this when I started encountering the error
+~canceling statement due to conflict with recovery~. From the
+description above, it sounds like master-standby replication does not
+involve WAL-shipping/streaming, so it avoids the query conflicts
+issue.
+
+Asynchronous multimaster replication also sounds like it would work,
+and since we're only sending read-only queries to the replica(s), we
+don't have to hve any conflict-resolution rules.
+
+Assuming all this works, somehow, and all the assumptions hold
+true, this will take a lot of work to scale, and may hit a
+ceiling. I'm not sure what that ceiling is for Postgres.
+
+From reading the docs, I get a sense of how powerful and extensible
+Postgres is. If you're not afraid of the engineering costs, Postgres
+sounds like it could handle almost all your data needs.
+
+-----
+If you do need to setup fdw, perhaps for saner purposes, here is how I
+went about setting up postgres_fdw:
+
+#+BEGIN_SRC sql
+create extension if not exists postgres_fdw;
+#+END_SRC
+
+I  wrote a couple of helper functions.
+
+This one takes an array of the databases you want to connect to and creates
+servers for each:
+
+#+BEGIN_SRC sql
+CREATE OR REPLACE FUNCTION create_servers(dbs text[]) RETURNS void as $$
+DECLARE
+  db text;
+BEGIN
+  FOREACH db IN ARRAY dbs
+    LOOP
+      EXECUTE format('create server %s FOREIGN DATA WRAPPER postgres_fdw '
+                     'options (host ''127.0.0.1'', dbname ''%s'', port ''5435'');',
+		     replace(db,'-','_'), db);
+    END LOOP;
+END;
+$$LANGUAGE plpgsql;
+#+END_SRC
+
+This one creates user mappings for each of those servers:
+#+BEGIN_SRC sql
+CREATE OR REPLACE FUNCTION create_user_mappings(dbs text[]) RETURNS void as $$
+DECLARE
+  db text;
+BEGIN
+  FOREACH db IN ARRAY dbs
+    LOOP
+      EXECUTE format('CREATE USER MAPPING FOR CURRENT_USER SERVER %s '
+                     'OPTIONS (user ''<user>'', password ''<password>'');',
+		     replace(db,'-','_'));
+    END LOOP;
+END;
+$$LANGUAGE plpgsql;
+#+END_SRC
+
+This one imports tables from all your databases. If you have any user-defined
+types you have to manually create them before running this. It will fail and
+chastise you harshly if you do not.
+
+#+BEGIN_SRC sql
+CREATE OR REPLACE FUNCTION import_tables(dbs text[]) RETURNS void as $$
+DECLARE
+  db text;
+BEGIN
+  FOREACH db IN ARRAY dbs
+    LOOP
+      EXECUTE format('CREATE SCHEMA %s;', replace(db,'-','_'));
+      EXECUTE format('IMPORT FOREIGN SCHEMA public FROM SERVER %s INTO %1$s;',
+                     replace(db,'-','_'));
+    END LOOP;
+END;
+$$LANGUAGE plpgsql;
+#+END_SRC
+
+That's it. Now you can query table foo in database bar by referencing it as
+bar.foo.
