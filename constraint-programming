@@ -62,7 +62,7 @@ my Emacs 26 machine. The first challenge was ~SEND+MORE=MONEY~:
 Putting this into a function:
 #+BEGIN_SRC lisp
 (defun puzzle-words(puzzle op)
-  (let ((split (or (split-sequence:split-sequence op puzzle))))
+  (let ((split (split-sequence:split-sequence op puzzle)))
     (append (butlast split) (split-sequence:split-sequence #\= (first (last split))))))
 
 (defun decompose-vars(word vars)
