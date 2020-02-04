@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Exploring constraint programming with CL's Screamer</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="Brian Kamotho" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<link rel="stylesheet" type="text/css" href="style.css" />
+<link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="org-div-home-and-up">
+ <a accesskey="h" href="https://unwindprotect.com/postgres-fdw"> UP </a>
+ |
+ <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
+</div><div id="content">
+<h1 class="title">Exploring constraint programming with CL's Screamer</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org00606a9">1. Cryptarithmetic</a></li>
+<li><a href="#org4f1079e">2. The <i>N</i>-Queens Puzzle</a></li>
+<li><a href="#org2524f07">3. Simultaneous linear equations</a></li>
+</ul>
+</div>
+</div>
+<p>
+A long time ago I wrote a sudoku solver - I suppose everyone does something of
+the sort at some point. I laboriously wrote the algorithm to solve it - the
+imperative way of solving this kinds of problems. <a href="https://en.wikipedia.org/wiki/Constraint_programming">Constraint programming</a> is the
+declarative way.
+</p>
+
+<p>
+I've encountered the CL library Screamer before, but for some reason the cranial
+semantic network didn't quite connect these concepts. It took seeing Screamer
+listed on the <a href="https://en.wikipedia.org/wiki/Constraint_programming#Some_languages_that_support_constraint_programming">list of CP implementations</a>, alongside Google's <a href="https://developers.google.com/optimization">OR-Tools</a>, for those
+particular neurons to fire.
+</p>
+
+<p>
+The <a href="https://nikodemus.github.io/screamer/#Original-Publications">documentation</a> has links to the original Screamer publications, one from as
+far back as 1991!
+</p>
+
+<div id="outline-container-org00606a9" class="outline-2">
+<h2 id="org00606a9"><span class="section-number-2">1</span> Cryptarithmetic</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The very first thing I wanted to solve using CP is a <a href="https://en.wikipedia.org/wiki/Verbal_arithmetic">cryptarithm</a>, so I grabbed
+my Emacs 26 machine. The first challenge was <code>SEND+MORE=MONEY</code>:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(ql:quickload <span style="color: #b0c4de;">:screamer</span>)
+(ql:quickload <span style="color: #b0c4de;">:split-sequence</span>)
+
+(<span style="color: #00ffff;">defpackage</span> <span style="color: #63b8ff;">:cp</span>
+  (<span style="color: #b0c4de;">:use</span> <span style="color: #b0c4de;">:cl</span>)
+  (<span style="color: #b0c4de;">:use</span> <span style="color: #b0c4de;">:screamer</span>))
+
+(<span style="color: #00ffff;">in-package</span> <span style="color: #b0c4de;">:cp</span>)
+
+<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">SEND + MORE = MONEY</span>
+(all-values
+  (<span style="color: #00ffff;">let</span> ((S (an-integer-betweenv 1 9 <span style="color: #b0c4de;">:S</span>))
+        (E (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:E</span>))
+        (N (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:N</span>))
+        (D (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:D</span>))
+        (M (an-integer-betweenv 1 9 <span style="color: #b0c4de;">:M</span>))
+        (O (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:O</span>))
+        (R (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:R</span>))
+        (Y (an-integer-betweenv 0 9 <span style="color: #b0c4de;">:Y</span>)))
+
+    <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">All values are unique</span>
+    (assert! (/=V S E N D M O R Y))
+
+    <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Final constraints</span>
+    (assert! (=V (+V (*V 1000 S) (*V 100 E) (*V 10 N) D
+                     (*V 1000 M) (*V 100 O) (*V 10 R) E)
+                 (+V (*V 10000 M) (*V 1000 O) (*V 100 N) (*V 10 E) Y)))
+
+    (solution (list S E N D M O R Y)
+              (static-ordering #'divide-and-conquer-force))))
+<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">=&gt; ((9 5 6 7 1 0 8 2))</span>
+</pre>
+</div>
+
+<p>
+Putting this into a function:
+</p>
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">puzzle-words</span>(puzzle op)
+  (<span style="color: #00ffff;">let</span> ((split (or (split-sequence:split-sequence op puzzle))))
+    (append (butlast split) (split-sequence:split-sequence #\= (first (last split))))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">decompose-vars</span>(word vars)
+  (apply
+   #'+V
+   (<span style="color: #00ffff;">loop</span>
+      for i from (1- (length word)) downto 0
+      for char across word
+      for var = (gethash char vars)
+      collecting (*V var (expt 10 i)))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">solve</span>(puzzle-string)
+  (<span style="color: #00ffff;">let*</span> ((puzzle (remove-if-not (<span style="color: #00ffff;">lambda</span> (char)
+                                  (or (alphanumericp char)
+                                      (member char '(#\+ #\- #\* #\=))))
+                                puzzle-string))
+         (op (find-if-not #'upper-case-p puzzle))
+         (op-func (<span style="color: #00ffff;">case</span> op
+                    (#\x #'*V)
+                    (#\+ #'+V)
+                    (#\- #'-V)))
+         (puzzle-words (puzzle-words puzzle op))
+         (puzzle-chars (remove-duplicates (apply #'concatenate 'string puzzle-words)))
+         (puzzle-vars
+          (<span style="color: #00ffff;">loop</span> for char across puzzle-chars
+             collecting (an-integer-betweenv
+                         (<span style="color: #00ffff;">if</span> (some (<span style="color: #00ffff;">lambda</span> (puzzle-word)
+                                     (char= char (schar puzzle-word 0)))
+                                   puzzle-words)
+                             1
+                             0)
+                         9 char)))
+         (vars (make-hash-table <span style="color: #b0c4de;">:size</span> (length puzzle-chars))))
+    (<span style="color: #00ffff;">loop</span>
+       for char across puzzle-chars
+       for var in puzzle-vars do
+         (setf (gethash char vars) var))
+
+    <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">All values are unique</span>
+    (assert! (apply #'/=V puzzle-vars))
+
+    <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Final constraints</span>
+    (assert! (=V (funcall op-func
+                          (decompose-vars (first puzzle-words) vars)
+                          (decompose-vars (second puzzle-words) vars))
+                 (decompose-vars (third puzzle-words) vars)))
+
+    <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Solve</span>
+    (map 'list
+         <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Solution printer function</span>
+         (<span style="color: #00ffff;">lambda</span>(numbers)
+           (map 'string (<span style="color: #00ffff;">lambda</span>(char)
+                          (<span style="color: #00ffff;">if</span> (upper-case-p char)
+                              (coerce (format nil <span style="color: #ffc1c1;">"~A"</span> (nth (position char puzzle-chars)
+                                                            numbers))
+                                      'character)
+                              char))
+                puzzle-string))
+         (all-values
+           (solution puzzle-vars
+                     (static-ordering #'divide-and-conquer-force))))))
+
+<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">REPL</span>
+CP&gt; (solve <span style="color: #ffc1c1;">"SEND+MORE=MONEY"</span>)
+(<span style="color: #ffc1c1;">"9567+1085=10652"</span>)
+CP&gt; (solve <span style="color: #ffc1c1;">"FUNxBBG=SUMMER"</span>)
+(<span style="color: #ffc1c1;">"715x446=318890"</span> <span style="color: #ffc1c1;">"746x335=249910"</span>)
+</pre>
+</div>
+
+<p>
+Of course, for these kinds of problems, the more heuristics one could add to
+prune down the search-space, the better.
+</p>
+<hr />
+</div>
+</div>
+
+<div id="outline-container-org4f1079e" class="outline-2">
+<h2 id="org4f1079e"><span class="section-number-2">2</span> The <i>N</i>-Queens Puzzle</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+In the previous example, functions like <code>*V</code> and <code>=V</code> were predefined, so it was
+pretty straightforward to implement.  That's because we used the <i>constraint
+propagation</i> features of Screamer. The doc distinguishes between <i>constraint
+propagation</i> features and <i>non-deterministic</i> features.
+</p>
+
+<p>
+<a href="https://engineering.purdue.edu/~qobi/papers/aaai93.pdf">This</a> paper has an example of solving the <i>N</i>-Queens Problem using Screamer, but
+the solution uses the constraint propagation features. I wanted to explore the
+non-deterministic features first, before I dive into how exactly the magic of
+the constraint propagation features works.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">list-either</span>(a-list)
+  (<span style="color: #00ffff;">cond</span> ((rest a-list)
+         (either (first a-list) (list-either (rest a-list))))
+        (a-list
+         (first a-list))
+        (t
+         (fail))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">attacks-p</span> (a b)
+  (= (abs (- (first a) (first b)))
+     (abs (- (second a) (second b)))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">a-piece</span>(n row <span style="color: #63b8ff;">&amp;optional</span> pieces)
+  (<span style="color: #00ffff;">let*</span> ((occupied-columns (map 'list #'second pieces))
+         (columns (<span style="color: #00ffff;">loop</span> for count from 0 below n
+                     unless (member count occupied-columns)
+                     collect count)))
+    (list row
+          (list-either columns))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">a-valid-piece</span> (n row <span style="color: #63b8ff;">&amp;optional</span> pieces)
+  (<span style="color: #00ffff;">let</span> ((piece (a-piece n row pieces)))
+    (<span style="color: #00ffff;">if</span> (notany (<span style="color: #00ffff;">lambda</span> (arg)
+                  (attacks-p arg piece))
+                pieces)
+        piece
+        (fail))))
+
+(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">complete-set</span> (n <span style="color: #63b8ff;">&amp;optional</span> (row 0) pieces)
+  (<span style="color: #00ffff;">if</span> (&lt; row n)
+      (complete-set n (1+ row) (append pieces (list (a-valid-piece n row pieces))))
+      pieces))
+</pre>
+</div>
+
+<p>
+Sample run for 6-queens problem - which, surprisingly, has fewer solutions (4) than
+the 5-queens problem (10):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">CP&gt; (all-values (complete-set 6))
+
+(((0 1) (1 3) (2 5) (3 0) (4 2) (5 4)) ((0 2) (1 5) (2 1) (3 4) (4 0) (5 3))
+ ((0 3) (1 0) (2 4) (3 1) (4 5) (5 2)) ((0 4) (1 2) (2 0) (3 5) (4 3) (5 1)))
+</pre>
+</div>
+
+<p>
+By inserting a breakpoint I could observe the backtracking:
+</p>
+
+
+<div id="org3bd809d" class="figure">
+<p><img src="./media/6queens.gif" alt="6queens.gif" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Backtracking on the 6queens problem</p>
+</div>
+
+<p>
+<code>either</code> and <code>fail</code> provide a declarative way to enumerate the search-space and
+backtrack. Screamer does this by rewriting non-deterministic functions and using
+Continuation-passing style - a technique the papers call CPS conversion. You can
+see this in the macroexpansion of a non-deterministic defun statement:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(macroexpand-1 '(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-size: 110%; font-weight: bold;">foo-or-bar</span> () (either <span style="color: #b0c4de;">:foo</span> <span style="color: #b0c4de;">:bar</span>)))
+<span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Expands to:</span>
+(<span style="color: #00ffff;">EVAL-WHEN</span> (<span style="color: #b0c4de;">:COMPILE-TOPLEVEL</span> <span style="color: #b0c4de;">:LOAD-TOPLEVEL</span> <span style="color: #b0c4de;">:EXECUTE</span>)
+  (SCREAMER::CACHE-DEFINITION 'FOO-OR-BAR 'NIL
+                              '((EITHER
+                                  <span style="color: #b0c4de;">:FOO</span>
+                                  <span style="color: #b0c4de;">:BAR</span>))
+                              '(A-BOOLEAN))
+  (COMMON-LISP:DEFUN FOO-OR-BAR ()
+    (<span style="color: #00ffff;">DECLARE</span> (IGNORE))
+    (SCREAMER::SCREAMER-ERROR
+     <span style="color: #ffc1c1;">"Function ~S is a nondeterministic function. As such, it~%~</span>
+<span style="color: #ffc1c1;">                  must be called only from a nondeterministic context."</span>
+     'FOO-OR-BAR))
+  (COMMON-LISP:DEFUN FOO-OR-BAR-NONDETERMINISTIC (#<span style="color: #b0c4de;">:CONTINUATION-915</span>)
+    #<span style="color: #b0c4de;">:CONTINUATION-915</span>
+    (<span style="color: #00ffff;">PROGN</span>
+     (<span style="color: #00ffff;">LET</span> ((#<span style="color: #b0c4de;">:CONTINUATION-919</span>
+            #'(<span style="color: #00ffff;">LAMBDA</span> (<span style="color: #63b8ff;">&amp;OPTIONAL</span> #<span style="color: #b0c4de;">:DUMMY-917</span> <span style="color: #63b8ff;">&amp;REST</span> #<span style="color: #b0c4de;">:OTHER-918</span>)
+                (<span style="color: #00ffff;">DECLARE</span> (SCREAMER::MAGIC)
+                         (IGNORE #<span style="color: #b0c4de;">:OTHER-918</span>))
+                (<span style="color: #00ffff;">IF</span> #<span style="color: #b0c4de;">:DUMMY-917</span>
+                    (FUNCALL #<span style="color: #b0c4de;">:CONTINUATION-915</span> <span style="color: #b0c4de;">:FOO</span>)
+                    (FUNCALL #<span style="color: #b0c4de;">:CONTINUATION-915</span> <span style="color: #b0c4de;">:BAR</span>)))))
+       (SCREAMER::A-BOOLEAN-NONDETERMINISTIC #<span style="color: #b0c4de;">:CONTINUATION-919</span>))))
+  (SCREAMER::DECLARE-NONDETERMINISTIC 'FOO-OR-BAR)
+  'FOO-OR-BAR)
+</pre>
+</div>
+<hr />
+</div>
+</div>
+
+<div id="outline-container-org2524f07" class="outline-2">
+<h2 id="org2524f07"><span class="section-number-2">3</span> Simultaneous linear equations</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+With this problem I finally understood the limits and essense of
+Screamer. Having seen how easy it is to solve this kind of problem in <a href="https://en.wikipedia.org/wiki/CLP(R)">CLP(R)</a>, I
+tested this out in Screamer:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-lisp">(<span style="color: #00ffff;">let</span> ((x (a-realv <span style="color: #b0c4de;">:x</span>))
+      (y (a-realv <span style="color: #b0c4de;">:y</span>)))
+
+  <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">x - y = -1</span>
+  (assert! (equalv (-V x y) -1))
+  <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">3x + y = 9</span>
+  (assert! (equalv (+V (*V 3 x) y) 9))
+
+  (list (value-of x)
+        (value-of y)))
+</pre>
+</div>
+
+<p>
+Of course it didn't work. There is no such magic, at least not in
+Screamer. Although there are features I haven't used, such as undoing
+side-effects and writing custom force-functions, after figuring out why the
+above didn't work I think I truly understood how Screamer works. I don't know
+how CLP(R) works, but one of the Screamer papers gives some insight:
+</p>
+
+<pre class="example">
+...In contrast, Screamer uses constraint satisfaction features methods based on
+range propagation rather than the linear programming techniques used in CLP(R)
+and CHIP.
+</pre>
+
+<p>
+So here is what works in Screamer:
+</p>
+<div class="org-src-container">
+<pre class="src src-lisp">CP&gt; (one-value (<span style="color: #00ffff;">let</span> ((x (a-realv <span style="color: #b0c4de;">:x</span>))
+                     (y (a-realv <span style="color: #b0c4de;">:y</span>)))
+
+                 <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">x - y = -1</span>
+                 (assert! (equalv (-V x y) -1))
+                 <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">3x + y = 9</span>
+                 (assert! (equalv (+V (*V 3 x) y) 9))
+
+                 (solution (list x y)
+                           (static-ordering #'linear-force))))
+(2 3)
+</pre>
+</div>
+
+<p>
+The variables have no finite range, so we can't use the <code>divide-and-conquer</code>
+force function, but they have a countable set, so we can use <code>linear-force</code>.
+</p>
+
+<p>
+<code>linear-force</code> works by trying each potential value in turn, so if we wrapped
+the code above in <code>all-values</code> rather than <code>one-value</code> it would never halt.
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Date: 2020-02-04</p>
+<p class="author">Author: Brian Kamotho</p>
+<p class="validation"></p>
+</div>
+</body>
+</html>

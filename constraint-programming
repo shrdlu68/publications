@@ -1,0 +1,286 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/postgres-fdw
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Exploring constraint programming with CL's Screamer
+#+AUTHOR: Brian Kamotho
+#+DATE: 2020-02-04
+
+A long time ago I wrote a sudoku solver - I suppose everyone does something of
+the sort at some point. I laboriously wrote the algorithm to solve it - the
+imperative way of solving this kinds of problems. [[https://en.wikipedia.org/wiki/Constraint_programming][Constraint programming]] is the
+declarative way.
+
+I've encountered the CL library Screamer before, but for some reason the cranial
+semantic network didn't quite connect these concepts. It took seeing Screamer
+listed on the [[https://en.wikipedia.org/wiki/Constraint_programming#Some_languages_that_support_constraint_programming][list of CP implementations]], alongside Google's [[https://developers.google.com/optimization][OR-Tools]], for those
+particular neurons to fire.
+
+The [[https://nikodemus.github.io/screamer/#Original-Publications][documentation]] has links to the original Screamer publications, one from as
+far back as 1991!
+
+* Cryptarithmetic
+The very first thing I wanted to solve using CP is a [[https://en.wikipedia.org/wiki/Verbal_arithmetic][cryptarithm]], so I grabbed
+my Emacs 26 machine. The first challenge was ~SEND+MORE=MONEY~:
+
+#+BEGIN_SRC lisp
+(ql:quickload :screamer)
+(ql:quickload :split-sequence)
+
+(defpackage :cp
+  (:use :cl)
+  (:use :screamer))
+
+(in-package :cp)
+
+;; SEND + MORE = MONEY
+(all-values
+  (let ((S (an-integer-betweenv 1 9 :S))
+	(E (an-integer-betweenv 0 9 :E))
+	(N (an-integer-betweenv 0 9 :N))
+	(D (an-integer-betweenv 0 9 :D))
+	(M (an-integer-betweenv 1 9 :M))
+	(O (an-integer-betweenv 0 9 :O))
+	(R (an-integer-betweenv 0 9 :R))
+	(Y (an-integer-betweenv 0 9 :Y)))
+
+    ;; All values are unique
+    (assert! (/=V S E N D M O R Y))
+
+    ;; Final constraints
+    (assert! (=V (+V (*V 1000 S) (*V 100 E) (*V 10 N) D
+		     (*V 1000 M) (*V 100 O) (*V 10 R) E)
+		 (+V (*V 10000 M) (*V 1000 O) (*V 100 N) (*V 10 E) Y)))
+
+    (solution (list S E N D M O R Y)
+	      (static-ordering #'divide-and-conquer-force))))
+;; => ((9 5 6 7 1 0 8 2))
+#+END_SRC
+
+Putting this into a function:
+#+BEGIN_SRC lisp
+(defun puzzle-words(puzzle op)
+  (let ((split (or (split-sequence:split-sequence op puzzle))))
+    (append (butlast split) (split-sequence:split-sequence #\= (first (last split))))))
+
+(defun decompose-vars(word vars)
+  (apply
+   #'+V
+   (loop
+      for i from (1- (length word)) downto 0
+      for char across word
+      for var = (gethash char vars)
+      collecting (*V var (expt 10 i)))))
+
+(defun solve(puzzle-string)
+  (let* ((puzzle (remove-if-not (lambda (char)
+				  (or (alphanumericp char)
+				      (member char '(#\+ #\- #\* #\=))))
+				puzzle-string))
+	 (op (find-if-not #'upper-case-p puzzle))
+	 (op-func (case op
+		    (#\x #'*V)
+		    (#\+ #'+V)
+		    (#\- #'-V)))
+	 (puzzle-words (puzzle-words puzzle op))
+	 (puzzle-chars (remove-duplicates (apply #'concatenate 'string puzzle-words)))
+	 (puzzle-vars
+	  (loop for char across puzzle-chars
+	     collecting (an-integer-betweenv
+			 (if (some (lambda (puzzle-word)
+				     (char= char (schar puzzle-word 0)))
+				   puzzle-words)
+			     1
+			     0)
+			 9 char)))
+	 (vars (make-hash-table :size (length puzzle-chars))))
+    (loop
+       for char across puzzle-chars
+       for var in puzzle-vars do
+	 (setf (gethash char vars) var))
+    
+    ;; All values are unique
+    (assert! (apply #'/=V puzzle-vars))
+
+    ;; Final constraints
+    (assert! (=V (funcall op-func
+			  (decompose-vars (first puzzle-words) vars)
+			  (decompose-vars (second puzzle-words) vars))
+		 (decompose-vars (third puzzle-words) vars)))
+
+    ;; Solve
+    (map 'list
+	 ;; Solution printer function
+	 (lambda(numbers)
+	   (map 'string (lambda(char)
+			  (if (upper-case-p char)
+			      (coerce (format nil "~A" (nth (position char puzzle-chars)
+							    numbers))
+				      'character)
+			      char))
+		puzzle-string))
+	 (all-values
+	   (solution puzzle-vars
+		     (static-ordering #'divide-and-conquer-force))))))
+
+;; REPL
+CP> (solve "SEND+MORE=MONEY")
+("9567+1085=10652")
+CP> (solve "FUNxBBG=SUMMER")
+("715x446=318890" "746x335=249910")
+#+END_SRC
+
+Of course, for these kinds of problems, the more heuristics one could add to
+prune down the search-space, the better.
+-----
+
+* The /N/-Queens Puzzle
+In the previous example, functions like ~*V~ and ~=V~ were predefined, so it was
+pretty straightforward to implement.  That's because we used the /constraint
+propagation/ features of Screamer. The doc distinguishes between /constraint
+propagation/ features and /non-deterministic/ features.
+
+[[https://engineering.purdue.edu/~qobi/papers/aaai93.pdf][This]] paper has an example of solving the /N/-Queens Problem using Screamer, but
+the solution uses the constraint propagation features. I wanted to explore the
+non-deterministic features first, before I dive into how exactly the magic of
+the constraint propagation features works.
+
+#+BEGIN_SRC lisp
+(defun list-either(a-list)
+  (cond ((rest a-list)
+	 (either (first a-list) (list-either (rest a-list))))
+	(a-list
+	 (first a-list))
+	(t
+	 (fail))))
+
+(defun attacks-p (a b)
+  (= (abs (- (first a) (first b)))
+     (abs (- (second a) (second b)))))
+
+(defun a-piece(n row &optional pieces)
+  (let* ((occupied-columns (map 'list #'second pieces))
+	 (columns (loop for count from 0 below n
+		     unless (member count occupied-columns)
+		     collect count)))
+    (list row
+	  (list-either columns))))
+
+(defun a-valid-piece (n row &optional pieces)
+  (let ((piece (a-piece n row pieces)))
+    (if (notany (lambda (arg)
+		  (attacks-p arg piece))
+		pieces)
+        piece
+	(fail))))
+
+(defun complete-set (n &optional (row 0) pieces)
+  (if (< row n)
+      (complete-set n (1+ row) (append pieces (list (a-valid-piece n row pieces))))
+      pieces))
+#+END_SRC
+
+Sample run for 6-queens problem - which, surprisingly, has fewer solutions (4) than
+the 5-queens problem (10):
+
+#+BEGIN_SRC lisp
+CP> (all-values (complete-set 6))
+
+(((0 1) (1 3) (2 5) (3 0) (4 2) (5 4)) ((0 2) (1 5) (2 1) (3 4) (4 0) (5 3))
+ ((0 3) (1 0) (2 4) (3 1) (4 5) (5 2)) ((0 4) (1 2) (2 0) (3 5) (4 3) (5 1)))
+#+END_SRC
+
+By inserting a breakpoint I could observe the backtracking:
+
+#+CAPTION: Backtracking on the 6queens problem
+#+NAME: 6queens.gif
+[[./media/6queens.gif]]
+
+~either~ and ~fail~ provide a declarative way to enumerate the search-space and
+backtrack. Screamer does this by rewriting non-deterministic functions and using
+Continuation-passing style - a technique the papers call CPS conversion. You can
+see this in the macroexpansion of a non-deterministic defun statement:
+
+#+BEGIN_SRC lisp
+(macroexpand-1 '(defun foo-or-bar () (either :foo :bar)))
+;; Expands to:
+(EVAL-WHEN (:COMPILE-TOPLEVEL :LOAD-TOPLEVEL :EXECUTE)
+  (SCREAMER::CACHE-DEFINITION 'FOO-OR-BAR 'NIL
+			      '((EITHER
+				  :FOO
+				  :BAR))
+			      '(A-BOOLEAN))
+  (COMMON-LISP:DEFUN FOO-OR-BAR ()
+    (DECLARE (IGNORE))
+    (SCREAMER::SCREAMER-ERROR
+     "Function ~S is a nondeterministic function. As such, it~%~
+		  must be called only from a nondeterministic context."
+     'FOO-OR-BAR))
+  (COMMON-LISP:DEFUN FOO-OR-BAR-NONDETERMINISTIC (#:CONTINUATION-915)
+    #:CONTINUATION-915
+    (PROGN
+     (LET ((#:CONTINUATION-919
+	    #'(LAMBDA (&OPTIONAL #:DUMMY-917 &REST #:OTHER-918)
+		(DECLARE (SCREAMER::MAGIC)
+			 (IGNORE #:OTHER-918))
+		(IF #:DUMMY-917
+		    (FUNCALL #:CONTINUATION-915 :FOO)
+		    (FUNCALL #:CONTINUATION-915 :BAR)))))
+       (SCREAMER::A-BOOLEAN-NONDETERMINISTIC #:CONTINUATION-919))))
+  (SCREAMER::DECLARE-NONDETERMINISTIC 'FOO-OR-BAR)
+  'FOO-OR-BAR)
+#+END_SRC
+-----
+
+* Simultaneous linear equations
+With this problem I finally understood the limits and essense of
+Screamer. Having seen how easy it is to solve this kind of problem in [[https://en.wikipedia.org/wiki/CLP(R)][CLP(R)]], I
+tested this out in Screamer:
+
+#+BEGIN_SRC lisp
+(let ((x (a-realv :x))
+      (y (a-realv :y)))
+
+  ;; x - y = -1
+  (assert! (equalv (-V x y) -1))
+  ;; 3x + y = 9
+  (assert! (equalv (+V (*V 3 x) y) 9))
+  
+  (list (value-of x)
+	(value-of y)))
+#+END_SRC
+
+Of course it didn't work. There is no such magic, at least not in
+Screamer. Although there are features I haven't used, such as undoing
+side-effects and writing custom force-functions, after figuring out why the
+above didn't work I think I truly understood how Screamer works. I don't know
+how CLP(R) works, but one of the Screamer papers gives some insight:
+
+#+BEGIN_EXAMPLE
+...In contrast, Screamer uses constraint satisfaction features methods based on
+range propagation rather than the linear programming techniques used in CLP(R)
+and CHIP.
+#+END_EXAMPLE
+
+So here is what works in Screamer:
+#+BEGIN_SRC lisp
+CP> (one-value (let ((x (a-realv :x))
+		     (y (a-realv :y)))
+
+		 ;; x - y = -1
+		 (assert! (equalv (-V x y) -1))
+		 ;; 3x + y = 9
+		 (assert! (equalv (+V (*V 3 x) y) 9))
+		 
+		 (solution (list x y)
+			   (static-ordering #'linear-force))))
+(2 3)
+#+END_SRC
+
+The variables have no finite range, so we can't use the ~divide-and-conquer~
+force function, but they have a countable set, so we can use ~linear-force~.
+
+~linear-force~ works by trying each potential value in turn, so if we wrapped
+the code above in ~all-values~ rather than ~one-value~ it would never halt.
