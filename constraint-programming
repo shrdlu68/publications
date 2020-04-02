@@ -128,7 +128,7 @@ Putting this into a function:
 ;; REPL
 CP> (solve "SEND+MORE=MONEY")
 ("9567+1085=10652")
-CP> (solve "FUNxBBG=SUMMER")
+CP> (solve "FUNxBBQ=SUMMER")
 ("715x446=318890" "746x335=249910")
 #+END_SRC
 
