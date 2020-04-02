@@ -239,9 +239,9 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org2e3792b">1. Cryptarithmetic</a></li>
-<li><a href="#orgd1e50e2">2. The <i>N</i>-Queens Puzzle</a></li>
-<li><a href="#org25e1667">3. Simultaneous linear equations</a></li>
+<li><a href="#org0eeaadf">1. Cryptarithmetic</a></li>
+<li><a href="#org1bccc31">2. The <i>N</i>-Queens Puzzle</a></li>
+<li><a href="#org76ffae0">3. Simultaneous linear equations</a></li>
 </ul>
 </div>
 </div>
@@ -264,8 +264,8 @@ The <a href="https://nikodemus.github.io/screamer/#Original-Publications">docume
 far back as 1991!
 </p>
 
-<div id="outline-container-org2e3792b" class="outline-2">
-<h2 id="org2e3792b"><span class="section-number-2">1</span> Cryptarithmetic</h2>
+<div id="outline-container-org0eeaadf" class="outline-2">
+<h2 id="org0eeaadf"><span class="section-number-2">1</span> Cryptarithmetic</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The very first thing I wanted to solve using CP is a <a href="https://en.wikipedia.org/wiki/Verbal_arithmetic">cryptarithm</a>, so I grabbed
@@ -378,7 +378,7 @@ Putting this into a function:
 <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">REPL</span>
 CP&gt; (solve <span style="color: #ffc1c1;">"SEND+MORE=MONEY"</span>)
 (<span style="color: #ffc1c1;">"9567+1085=10652"</span>)
-CP&gt; (solve <span style="color: #ffc1c1;">"FUNxBBG=SUMMER"</span>)
+CP&gt; (solve <span style="color: #ffc1c1;">"FUNxBBQ=SUMMER"</span>)
 (<span style="color: #ffc1c1;">"715x446=318890"</span> <span style="color: #ffc1c1;">"746x335=249910"</span>)
 </pre>
 </div>
@@ -391,8 +391,8 @@ prune down the search-space, the better.
 </div>
 </div>
 
-<div id="outline-container-orgd1e50e2" class="outline-2">
-<h2 id="orgd1e50e2"><span class="section-number-2">2</span> The <i>N</i>-Queens Puzzle</h2>
+<div id="outline-container-org1bccc31" class="outline-2">
+<h2 id="org1bccc31"><span class="section-number-2">2</span> The <i>N</i>-Queens Puzzle</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 In the previous example, functions like <code>*V</code> and <code>=V</code> were predefined, so it was
@@ -462,7 +462,7 @@ By inserting a breakpoint I could observe the backtracking:
 </p>
 
 
-<div id="org6ffaaf0" class="figure">
+<div id="org8f08d08" class="figure">
 <p><img src="./media/6queens.gif" alt="6queens.gif" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Backtracking on the 6queens problem</p>
@@ -509,8 +509,8 @@ see this in the macroexpansion of a non-deterministic defun statement:
 </div>
 </div>
 
-<div id="outline-container-org25e1667" class="outline-2">
-<h2 id="org25e1667"><span class="section-number-2">3</span> Simultaneous linear equations</h2>
+<div id="outline-container-org76ffae0" class="outline-2">
+<h2 id="org76ffae0"><span class="section-number-2">3</span> Simultaneous linear equations</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 With this problem I finally understood the limits and essense of
