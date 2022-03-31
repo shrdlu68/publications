@@ -35,7 +35,7 @@ the document to test it. Pay no particular attention to it.
 #+END_SRC
 
 Good enough. And now the inspiration for the domain name should be apparent, for
-the non-lisers, or the lispers who are not commoners. There were a few things I
+the non-lispers, or the lispers who are not commoners. There were a few things I
 had to do though:
 
   - I expected org-mode to automagically use my themes when exporting, like

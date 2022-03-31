@@ -39,7 +39,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -51,7 +51,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -160,6 +160,19 @@
   .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
   .inlinetask {
     padding: 10px;
     border: 2px solid gray;
@@ -182,50 +195,26 @@
 <link rel="stylesheet" type="text/css" href="style.css" />
 <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2019 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -257,20 +246,20 @@ the document to test it. Pay no particular attention to it.
 
 <div class="org-src-container">
 <pre class="src src-lisp">(macroexpand-1 '(<span style="color: #00ffff;">with-open-file</span> (stream <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:element-type</span> 'octet)
-                 (read-byte stream)))
+         (read-byte stream)))
 
 <span style="color: #fa8072;">;; </span><span style="color: #ff7f24; font-style: italic;">Macroexpansion:</span>
 
-(<span style="color: #00ffff;">LET</span> ((STREAM (OPEN <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:ELEMENT-TYPE</span> 'OCTET)) (#<span style="color: #b0c4de;">:G482</span> T))
+(<span style="color: #00ffff;">LET</span> ((STREAM (OPEN <span style="color: #ffc1c1;">"/dev/urandom"</span> <span style="color: #b0c4de;">:ELEMENT-TYPE</span> 'OCTET)) (<span style="color: #fa8072;">#:</span><span style="color: #f08080; font-style: italic;">G482</span> T))
   (<span style="color: #00ffff;">UNWIND-PROTECT</span>
-      (<span style="color: #00ffff;">MULTIPLE-VALUE-PROG1</span> (<span style="color: #00ffff;">PROGN</span> (READ-BYTE STREAM)) (SETQ #<span style="color: #b0c4de;">:G482</span> NIL))
-    (<span style="color: #00ffff;">WHEN</span> STREAM (CLOSE STREAM <span style="color: #b0c4de;">:ABORT</span> #<span style="color: #b0c4de;">:G482</span>))))
+  (<span style="color: #00ffff;">MULTIPLE-VALUE-PROG1</span> (<span style="color: #00ffff;">PROGN</span> (READ-BYTE STREAM)) (SETQ <span style="color: #fa8072;">#:</span><span style="color: #f08080; font-style: italic;">G482</span> NIL))
+    (<span style="color: #00ffff;">WHEN</span> STREAM (CLOSE STREAM <span style="color: #b0c4de;">:ABORT</span> <span style="color: #fa8072;">#:</span><span style="color: #f08080; font-style: italic;">G482</span>))))
 </pre>
 </div>
 
 <p>
 Good enough. And now the inspiration for the domain name should be apparent, for
-the non-lisers, or the lispers who are not commoners. There were a few things I
+the non-lispers, or the lispers who are not commoners. There were a few things I
 had to do though:
 </p>
 
@@ -303,7 +292,6 @@ was to start somewhere.
 <div id="postamble" class="status">
 <p class="date">Date: 2019-10-30</p>
 <p class="author">Author: Brian Kamotho</p>
-<p class="validation"></p>
 </div>
 </body>
 </html>
