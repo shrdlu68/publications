@@ -1,0 +1,48 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/postgres-fdw
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Router hitch: TKIP&AES
+#+AUTHOR: Brian Kamotho
+#+DATE: 2022-03-31
+
+I updated my PC the other day, rebooted, and...my wifi stopped working.  After
+verifying that my ~/proc/config.gz == /usr/src/linux/.config~, I was at a loss.
+
+In the wpa_supplicant logs:
+#+BEGIN_SRC text
+wlp0s20f0u3: 22: fc:4a:e9:4f:8f:c9 ssid='foo' wpa_ie_len=26 rsn_ie_len=24 caps=0x1411 level=-91 freq=2437 
+wpa_parse_wpa_ie_rsn: invalid group cipher 0x8 (000fac02)
+wlp0s20f0u3:    skip - SSID mismatch
+#+END_SRC
+
+`foo` was indeed my ssid, what does it mean that it "mismatched"? Plus my other
+devices could connect just fine.  I thought the update had broken something
+between the kernel, firmware or something user-space.
+
+I was impatient - I needed to use my PC. Thinking that my specific network card
+was the problem (Intel Corporation Cannon Point-LP), I decided that since I had
+a Realtek USB WiFi dongle (Ralink Technology, Corp. MT7601U) I could use that in
+the meantime and deal with this breakage later.
+
+I compiled the MT7601U module, looking forward to continuing with my rudely
+interrupted life.  I couldn't connect with the dongle either. In fact,
+wpa_supplicant couldn't seem to see my ssid at all!
+
+I rebooted the router, chastising myself for not doing that in the first
+place. But there were other confounding cicrumstances - such as my
+just-completed upgrade, that made me not suspect the router.
+
+The reboot didn't resolve anything. Google was informative, but not helpful.
+
+Eventually I thought "invalid group cipher 0x8" surely means something was off
+with the encryption - maybe the router's firmware had updated? I logged into the
+router, looking for anything on encryption:
+#+CAPTION: Huawei HG8145V5 encryption mode
+#+NAME: encryption-mode.png
+[[./media/encryption-mode.png]]
+
+I toggled the encryption-mode from "TKIP&AES" to "AES", and voila! My oddyssey
+was over.
