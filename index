@@ -5,7 +5,7 @@
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 #+TITLE: UnwindProtect
 #+AUTHOR: Brian Kamotho
-#+DATE: <2019-10-30 Thu>
+#+DATE: 2021-04-07
 
 
 Welcome, there isn't much here right now:
@@ -14,3 +14,4 @@ Welcome, there isn't much here right now:
 - Almost certainly a bad idea: [[https://unwindprotect.com/postgres-fdw][Datawarehousing using Postgres FDW]]
 - Uncommon fun in Common Lisp: [[https://unwindprotect.com/constraint-programming][Exploring constraint programming with CL's Screamer]]
 - Save you some time: [[https://unwindprotect.com/router-hitch][Router hitch-TKIP&AES]]
+- The requirements vs elegant specs: [[https://unwindprotect.com/gql-pagination][GraphQL pagination]]

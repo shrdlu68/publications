@@ -3,10 +3,9 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-07 Thu 13:28 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnwindProtect</title>
+<title>GraphQL Pagination</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brian Kamotho" />
 <style type="text/css">
@@ -220,27 +219,86 @@
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href=""> UP </a>
+ <a accesskey="h" href="https://unwindprotect.com/router-hitch"> UP </a>
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content">
-<h1 class="title">UnwindProtect</h1>
+<h1 class="title">GraphQL Pagination</h1>
 <p>
-Welcome, there isn't much here right now:
+According to the <a href="https://relay.dev/graphql/connections.htm">relay connection spec</a>, the PageInfo type should look like this:
+</p>
+<div class="org-src-container">
+<pre class="src src-graphql"><span style="color: #00ffff;">type</span> <span style="color: #00fa9a; font-weight: bold;">PageInfo</span> {
+  startCursor: <span style="color: #63b8ff;">String</span>!
+  endCursor: <span style="color: #63b8ff;">String</span>!
+  hasPreviousPage: <span style="color: #63b8ff;">Boolean</span>!
+  hasNextPage: <span style="color: #63b8ff;">Boolean</span>!
+}
+</pre>
+</div>
+<p>
+I find it a well-thought-of spec, with consideration for constraints on the
+server's implementation:
 </p>
 <ul class="org-ul">
-<li>First post: <a href="https://unwindprotect.com/starting-somewhere">Starting somewhere</a></li>
-<li>Remember carriage returns? <a href="https://unwindprotect.com/awk-conundrum">An Awk conundrum</a></li>
-<li>Almost certainly a bad idea: <a href="https://unwindprotect.com/postgres-fdw">Datawarehousing using Postgres FDW</a></li>
-<li>Uncommon fun in Common Lisp: <a href="https://unwindprotect.com/constraint-programming">Exploring constraint programming with CL's Screamer</a></li>
-<li>Save you some time: <a href="https://unwindprotect.com/router-hitch">Router hitch-TKIP&amp;AES</a></li>
-<li>The requirements vs elegant specs: <a href="https://unwindprotect.com/gql-pagination">GraphQL pagination</a></li>
+<li><p>
+hasPreviousPage and hasNextPage are optional
+</p>
+<blockquote>
+<p>
+If the server can efficiently determine that elements exist prior to after, return true.
+If the server can efficiently determine that elements exist following before, return true.
+&#x2026;
+else return false
+</p>
+</blockquote></li>
+<li>There is no requirement for the server to calculate the total number of
+pages. Counting <a href="https://wiki.postgresql.org/wiki/Slow_Counting">is expensive on Postgres</a> for example.</li>
 </ul>
+
+<p>
+The only gripe I have with it is that instead of the more cogent `limit`
+parameter when paginating, they use `first` when paginating forward and `last`
+when paginating backwards. I think `limit` could have worked just fine for both
+scenarios, with the direction of paging determined by specifying either `before`
+or `after`. Otherwise the spec is well thought of. One could page through an
+entire dataset in a consistent way.
+</p>
+
+<p>
+Of course, reality isn't always accomodating.  (Optimal) Implementations are not
+usually derived from "first principles" independent of requirements. Complex
+requirements beget complex implementation.
+</p>
+
+<p>
+For example, <a href="https://slack.engineering/evolving-api-pagination-at-slack/">this</a> blog post at Slack uses the relay spec as a guideline, but
+with a few changes to accomodate their specific needs. Notably, they introduce a
+`next_cursor` field. I don't know how exactly they implement this, but I imagine
+it requires getting limit+1 rows and slicing off the last one to return as
+`next_cursor`. Not a big deal, but also not quite as elegant as the relay spec
+sets out to be. I don't know if they support both forward and backward
+pagination with these semantics though - there doesn't seem to be a way to
+specify the direction. Maybe they don't need to.
+</p>
+
+<p>
+Back to my own scenario, it appears the `totalCount` is sometimes required. The
+good news is that it's graphQL - you don't have to resolve the field if the
+client doesn't request it. The bad news is that the client could request it even
+when they don't strictly need it or even use it.
+</p>
+
+<p>
+One alternative is to define a PageInfo type with `totalCount` and one without,
+and use the former only when explicitly requested and default to the one
+without. In any case, I'll keep it in mind the next time the topic of database
+performance comes up.
+</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-04-07</p>
+<p class="date">Date: 2022-04-07</p>
 <p class="author">Author: Brian Kamotho</p>
-<p class="date">Created: 2022-04-07 Thu 13:28</p>
 </div>
 </body>
 </html>
