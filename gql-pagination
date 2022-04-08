@@ -29,11 +29,11 @@ server's implementation:
 - There is no requirement for the server to calculate the total number of
   pages. Counting [[https://wiki.postgresql.org/wiki/Slow_Counting][is expensive on Postgres]] for example.
 
-The only gripe I have with it is that instead of the more cogent `limit`
-parameter when paginating, they use `first` when paginating forward and `last`
-when paginating backwards. I think `limit` could have worked just fine for both
-scenarios, with the direction of paging determined by specifying either `before`
-or `after`. Otherwise the spec is well thought of. One could page through an
+The only gripe I have with it is that instead of the more cogent ~limit~
+parameter when paginating, they use ~first~ when paginating forward and ~last~
+when paginating backwards. I think ~limit~ could have worked just fine for both
+scenarios, with the direction of paging determined by specifying either ~before~
+or ~after~. Otherwise the spec is well thought of. One could page through an
 entire dataset in a consistent way.
 
 Of course, reality isn't always accomodating.  (Optimal) Implementations are not
@@ -42,19 +42,18 @@ requirements beget complex implementation.
 
 For example, [[https://slack.engineering/evolving-api-pagination-at-slack/][this]] blog post at Slack uses the relay spec as a guideline, but
 with a few changes to accomodate their specific needs. Notably, they introduce a
-`next_cursor` field. I don't know how exactly they implement this, but I imagine
-it requires getting limit+1 rows and slicing off the last one to return as
-`next_cursor`. Not a big deal, but also not quite as elegant as the relay spec
-sets out to be. I don't know if they support both forward and backward
-pagination with these semantics though - there doesn't seem to be a way to
-specify the direction. Maybe they don't need to.
+~next_cursor~ field. I don't know how exactly they implement this, but I imagine
+it requires getting ~limit+1~ rows and slicing off the last one to return as
+~next_cursor~. Not a big deal, but also not quite as elegant as the relay spec
+sets out to be. In any case, one has to do ~limit+1~ to know if there is a next
+page.
 
-Back to my own scenario, it appears the `totalCount` is sometimes required. The
+Back to my own scenario, it appears the ~totalCount~ is sometimes required. The
 good news is that it's graphQL - you don't have to resolve the field if the
 client doesn't request it. The bad news is that the client could request it even
 when they don't strictly need it or even use it.
 
-One alternative is to define a PageInfo type with `totalCount` and one without,
+One alternative is to define a PageInfo type with ~totalCount~ and one without,
 and use the former only when explicitly requested and default to the one
 without. In any case, I'll keep it in mind the next time the topic of database
 performance comes up.

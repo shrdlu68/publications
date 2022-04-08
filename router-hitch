@@ -18,7 +18,7 @@ wpa_parse_wpa_ie_rsn: invalid group cipher 0x8 (000fac02)
 wlp0s20f0u3:    skip - SSID mismatch
 #+END_SRC
 
-`foo` was indeed my ssid, what does it mean that it "mismatched"? Plus my other
+~foo~ was indeed my ssid, what does it mean that it "mismatched"? Plus my other
 devices could connect just fine.  I thought the update had broken something
 between the kernel, firmware or something user-space.
 
