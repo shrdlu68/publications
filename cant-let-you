@@ -6,7 +6,7 @@
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 #+TITLE: A GraphQL oddity
 #+AUTHOR: Brian Kamotho
-#+DATE: 2022-04-07
+#+DATE: 2022-04-12
 
 Warning: I have tried to make this post not sound like a rant, but I think I
 failed.
@@ -32,7 +32,7 @@ Arkanar in /*Hard to be a God(2013)*/. The backwardness is...grotesque.
 
 Well, now that it's schema-first, it means that I can't use the language's
 type-system to model my GraphQl schema. Say I wanted my GraphQL schema to look
-something like this:
+something like this:\\
 Python:
 #+begin_src python
   class DateFields:
