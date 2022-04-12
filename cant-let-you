@@ -1,0 +1,96 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/gql-pagination
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: A GraphQL oddity
+#+AUTHOR: Brian Kamotho
+#+DATE: 2022-04-07
+
+Warning: I have tried to make this post not sound like a rant, but I think I
+failed.
+
+Gqlgen is a golang gql library that is schema-first. That is to say, it is
+somewhat declarative. It sounds like a good idea, but having used graphene and
+very happy with it, I'm not quite sold on the "benefits" of being schema-first -
+maybe it's something specific to Golang. I say "somewhat" because it takes care
+of generating some boilerplate using ~go run github.com/99designs/gqlgen
+generate~ and then leaves you to write the actual resolvers.
+
+If you annotate your code with a comment like this:
+#+begin_src go
+//go:generate go run github.com/99designs/gqlgen generate
+#+end_src
+You could just run ~go generate~. What's the point of that? I guess so that you
+invoke all your code-generating code with one command. Could you just put them
+all in ~Makefile~? Well, yes?
+
+If you are familiar with macros in Lisp, you must be severely disappointed by
+this development. It suddenly feels like you've been transported to the city of
+Arkanar in /*Hard to be a God(2013)*/. The backwardness is...grotesque.
+
+Well, now that it's schema-first, it means that I can't use the language's
+type-system to model my GraphQl schema. Say I wanted my GraphQL schema to look
+something like this:
+Python:
+#+begin_src python
+  class DateFields:
+	created_on = Column(DateTime)
+	updated_on = Column(DateTime)
+
+  class Bar(DateFields):
+    count = Column(Float)
+
+  class Foo(DateFields):
+	name = Column(String)
+	id = Column(UUIDType)
+	barid = Column(UUIDType)
+#+end_src
+
+Golang:
+#+begin_src go
+  type DateFields struct{
+	  createdOn time.Time
+	  updateOn time.Time
+  }
+
+  type Bar struct{
+	  DateFields
+	  count int
+  }
+
+  type Foo struct{
+	  DateFields
+	  name string
+	  barID string
+  }
+#+end_src
+
+This is the closest you can get to that in GraphQL:
+#+begin_src graphql
+  type DateFields {
+	createdOn: Time!
+	updatedOn: Time!
+  }
+
+  type Bar {
+	dateFields: DateFields!
+	count: Int!
+  }
+
+  type Foo{
+	dateFields: DateFields!
+	name: String!
+    barID: ID!
+  }
+#+end_src
+
+That's not quite the same thing, is it? My intention is to have shared fields,
+which I can achieve through inheritance in Python or embedding in Golang.
+
+/*I'm sorry Dave, I can't let you do that.*/
+
+In GraphQL, the only option is to resort to copy-pasting, string interpolation
+or implementation-specific features like [[https://github.com/jeanbmar/graphql-inherits][custom directives]]. It's just odd, why
+is there no way to share fields in the GraphQL type system?

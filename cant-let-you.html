@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnwindProtect</title>
+<title>A GraphQL oddity</title>
 <meta name="generator" content="Org mode" />
 <meta name="author" content="Brian Kamotho" />
 <style type="text/css">
@@ -219,26 +219,126 @@
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href=""> UP </a>
+ <a accesskey="h" href="https://unwindprotect.com/gql-pagination"> UP </a>
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content">
-<h1 class="title">UnwindProtect</h1>
+<h1 class="title">A GraphQL oddity</h1>
 <p>
-Welcome, there isn't much here right now:
+Warning: I have tried to make this post not sound like a rant, but I think I
+failed.
 </p>
-<ul class="org-ul">
-<li>First post: <a href="https://unwindprotect.com/starting-somewhere">Starting somewhere</a></li>
-<li>Remember carriage returns? <a href="https://unwindprotect.com/awk-conundrum">An Awk conundrum</a></li>
-<li>Almost certainly a bad idea: <a href="https://unwindprotect.com/postgres-fdw">Datawarehousing using Postgres FDW</a></li>
-<li>Uncommon fun in Common Lisp: <a href="https://unwindprotect.com/constraint-programming">Exploring constraint programming with CL's Screamer</a></li>
-<li>Save you some time: <a href="https://unwindprotect.com/router-hitch">Router hitch-TKIP&amp;AES</a></li>
-<li>The requirements vs elegant specs: <a href="https://unwindprotect.com/gql-pagination">GraphQL pagination</a></li>
-<li>I'm sorry Dave, I can't let you do that: <a href="https://unwindprotect.com/cant-let-you">A GraphQL oddity</a></li>
-</ul>
+
+<p>
+Gqlgen is a golang gql library that is schema-first. That is to say, it is
+somewhat declarative. It sounds like a good idea, but having used graphene and
+very happy with it, I'm not quite sold on the "benefits" of being schema-first -
+maybe it's something specific to Golang. I say "somewhat" because it takes care
+of generating some boilerplate using <code>go run github.com/99designs/gqlgen
+generate</code> and then leaves you to write the actual resolvers.
+</p>
+
+<p>
+If you annotate your code with a comment like this:
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #fa8072;">//</span><span style="color: #ff7f24; font-style: italic;">go:generate go run github.com/99designs/gqlgen generate</span>
+</pre>
+</div>
+<p>
+You could just run <code>go generate</code>. What's the point of that? I guess so that you
+invoke all your code-generating code with one command. Could you just put them
+all in <code>Makefile</code>? Well, yes?
+</p>
+
+<p>
+If you are familiar with macros in Lisp, you must be severely disappointed by
+this development. It suddenly feels like you've been transported to the city of
+Arkanar in <i><b>Hard to be a God(2013)</b></i>. The backwardness is&#x2026;grotesque.
+</p>
+
+<p>
+Well, now that it's schema-first, it means that I can't use the language's
+type-system to model my GraphQl schema. Say I wanted my GraphQL schema to look
+something like this:
+Python:
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #00ffff;">class</span> <span style="color: #63b8ff;">DateFields</span>:
+  <span style="color: #7fffd4;">created_on</span> = Column(DateTime)
+  <span style="color: #7fffd4;">updated_on</span> = Column(DateTime)
+
+<span style="color: #00ffff;">class</span> <span style="color: #63b8ff;">Bar</span>(DateFields):
+  <span style="color: #7fffd4;">count</span> = Column(Float)
+
+<span style="color: #00ffff;">class</span> <span style="color: #63b8ff;">Foo</span>(DateFields):
+  <span style="color: #7fffd4;">name</span> = Column(String)
+  <span style="color: #b0c4de;">id</span> = Column(UUIDType)
+  <span style="color: #7fffd4;">barid</span> = Column(UUIDType)
+</pre>
+</div>
+
+<p>
+Golang:
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #00ffff;">type</span> <span style="color: #63b8ff;">DateFields</span> <span style="color: #00ffff;">struct</span>{
+    createdOn <span style="color: #63b8ff;">time.Time</span>
+    updateOn <span style="color: #63b8ff;">time.Time</span>
+}
+
+<span style="color: #00ffff;">type</span> <span style="color: #63b8ff;">Bar</span> <span style="color: #00ffff;">struct</span>{
+    DateFields
+    count <span style="color: #63b8ff;">int</span>
+}
+
+<span style="color: #00ffff;">type</span> <span style="color: #63b8ff;">Foo</span> <span style="color: #00ffff;">struct</span>{
+    DateFields
+    name <span style="color: #63b8ff;">string</span>
+    barID <span style="color: #63b8ff;">string</span>
+}
+</pre>
+</div>
+
+<p>
+This is the closest you can get to that in GraphQL:
+</p>
+<div class="org-src-container">
+<pre class="src src-graphql"><span style="color: #00ffff;">type</span> <span style="color: #00fa9a; font-weight: bold;">DateFields</span> {
+  createdOn: <span style="color: #63b8ff;">Time</span>!
+  updatedOn: <span style="color: #63b8ff;">Time</span>!
+}
+
+<span style="color: #00ffff;">type</span> <span style="color: #00fa9a; font-weight: bold;">Bar</span> {
+  dateFields: <span style="color: #63b8ff;">DateFields</span>!
+  count: <span style="color: #63b8ff;">Int</span>!
+}
+
+<span style="color: #00ffff;">type</span> <span style="color: #00fa9a; font-weight: bold;">Foo</span>{
+  dateFields: <span style="color: #63b8ff;">DateFields</span>!
+  name: <span style="color: #63b8ff;">String</span>!
+  barID: <span style="color: #63b8ff;">ID</span>!
+}
+</pre>
+</div>
+
+<p>
+That's not quite the same thing, is it? My intention is to have shared fields,
+which I can achieve through inheritance in Python or embedding in Golang.
+</p>
+
+<p>
+<i><b>I'm sorry Dave, I can't let you do that.</b></i>
+</p>
+
+<p>
+In GraphQL, the only option is to resort to copy-pasting, string interpolation
+or implementation-specific features like <a href="https://github.com/jeanbmar/graphql-inherits">custom directives</a>. It's just odd, why
+is there no way to share fields in the GraphQL type system?
+</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-04-07</p>
+<p class="date">Date: 2022-04-07</p>
 <p class="author">Author: Brian Kamotho</p>
 </div>
 </body>
