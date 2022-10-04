@@ -1,0 +1,80 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/cant-let-you
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Flippin' bits
+#+AUTHOR: Brian Kamotho
+#+DATE: 2022-10-04
+
+I got curious about what kind of traffic I would get by [[https://en.wikipedia.org/wiki/Bitsquatting][bitsquatting]] some of the
+top-visited domain names (eg. google.com). It was also an excuse to write some
+bad CL :D, forthwith:
+
+#+begin_src lisp
+(deftype octet ()
+  '(unsigned-byte 8))
+
+(defun str-to-octets (str)
+  (let* ((len (length str))
+		 (octets (make-array len :element-type 'octet)))
+	(loop for index from 0 below len
+		  do (setf (aref octets index) (char-int (char str index))))
+	octets))
+
+(defun octets-to-str (octets)
+  (let* ((len (length octets))
+		 (str (make-string len)))
+	(loop for index from 0 below len
+		  do (setf (aref str index) (code-char (aref octets index))))
+	str))
+
+(defun bit-flips (url)
+  (let* ((out-len (* (length url) 8))
+		 (out (make-array out-len)))
+	(loop for index from 0 below out-len do
+		  (setf (aref out index) (string-to-octets url)))
+	(loop for out-index from 0 below out-len
+		  do (multiple-value-bind (char-index bit-index) (floor out-index 8)
+			   (setf (ldb (byte 1 bit-index) (aref (aref out out-index) char-index))
+					 (if (equal (ldb (byte 1 bit-index) (aref (aref out out-index) char-index)) 0)
+						 1
+						 0))))
+	(map 'list #'octets-to-str out)))
+
+(defun valid-domain (str)
+  (loop for letter across str always (and (lower-case-p letter) (standard-char-p letter))))
+#+end_src
+
+Since a valid domain name has to be a subset of ascii (so unicode-containing
+domain names have to be [[https://en.wikipedia.org/wiki/Punycode][punnycode-encoded]]), we filter out anything that's not
+/[a-z0-9-]/, and yes we do that lazily with #'standard-char-p.
+
+So what do the bit-flipped alternatives to .com look like?
+
+#+begin_src lisp
+* (sort (remove-if-not #'valid-domain (bit-flips "com")) #'string<)
+("aom" "bom" "cgm" "ckm" "cmm" "cnm" "coe" "coi" "col" "coo" "gom" "kom" "som")
+#+end_src
+
+I really miss Common Lisp, if only I could convince someone to pay me to write
+it. It'd be better than this I swear :D
+
+Well I'm not too sure what it would take to register google.gom, so I think I'll
+stick to the domain name without the TLD.
+
+#+begin_src lisp
+* (sort (remove-if-not #'valid-domain (bit-flips "google")) #'string<)
+("coogle" "eoogle" "foogle" "ggogle" "gkogle" "gmogle" "gnogle" "goggle"
+ "gokgle" "gomgle" "gongle" "goocle" "gooele" "goofle" "googde" "googhe"
+ "googla" "googld" "googlg" "googlm" "googlu" "googme" "googne" "gooole"
+ "goowle" "ooogle" "woogle")
+#+end_src
+
+Absolutely all of those are registered. Couldn't be bothered to automate the
+WHOIS lookup so I did it manually. I tried some of the other top-visited
+domains, even tiktok. It's clear either these companies took the threat of
+bitsquatting seriously and registered them, or some other enterprising entities
+are actively registering them for whatever purposes. Maybe people just like me
+experimenting.
