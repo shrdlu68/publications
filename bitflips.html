@@ -202,15 +202,6 @@
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content" class="content">
 <h1 class="title">Flippin' bits</h1>
-<div id="table-of-contents" role="doc-toc">
-<h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
-<ul>
-<li><a href="#orge442256">1. (sort (remove-if-not #'valid-domain (bit-flips "com")) #'string&lt;)</a></li>
-<li><a href="#org87d14f2">2. (sort (remove-if-not #'valid-domain (bit-flips "google")) #'string&lt;)</a></li>
-</ul>
-</div>
-</div>
 <p>
 I got curious about what kind of traffic I would get by <a href="https://en.wikipedia.org/wiki/Bitsquatting">bitsquatting</a> some of the
 top-visited domain names (eg. google.com). It was also an excuse to write some
@@ -263,16 +254,11 @@ domain names have to be <a href="https://en.wikipedia.org/wiki/Punycode">punnyco
 So what do the bit-flipped alternatives to .com look like?
 </p>
 
-<p>
-#+begin_src lisp
-</p>
-<div id="outline-container-orge442256" class="outline-2">
-<h2 id="orge442256"><span class="section-number-2">1.</span> (sort (remove-if-not #'valid-domain (bit-flips "com")) #'string&lt;)</h2>
-<div class="outline-text-2" id="text-1">
-<p>
-("aom" "bom" "cgm" "ckm" "cmm" "cnm" "coe" "coi" "col" "coo" "gom" "kom" "som")
-#+end_src
-</p>
+<div class="org-src-container">
+<pre class="src src-lisp">&gt;&gt; (sort (remove-if-not #'valid-domain (bit-flips <span style="color: #ffc1c1;">"com"</span>)) #'string&lt;)
+(<span style="color: #ffc1c1;">"aom"</span> <span style="color: #ffc1c1;">"bom"</span> <span style="color: #ffc1c1;">"cgm"</span> <span style="color: #ffc1c1;">"ckm"</span> <span style="color: #ffc1c1;">"cmm"</span> <span style="color: #ffc1c1;">"cnm"</span> <span style="color: #ffc1c1;">"coe"</span> <span style="color: #ffc1c1;">"coi"</span> <span style="color: #ffc1c1;">"col"</span> <span style="color: #ffc1c1;">"coo"</span> <span style="color: #ffc1c1;">"gom"</span> <span style="color: #ffc1c1;">"kom"</span> <span style="color: #ffc1c1;">"som"</span>)
+</pre>
+</div>
 
 <p>
 I really miss Common Lisp, if only I could convince someone to pay me to write
@@ -284,31 +270,23 @@ Well I'm not too sure what it would take to register google.gom, so I think I'll
 stick to the domain name without the TLD.
 </p>
 
-<p>
-#+begin_src lisp
-</p>
+<div class="org-src-container">
+<pre class="src src-lisp">&gt;&gt; (sort (remove-if-not #'valid-domain (bit-flips <span style="color: #ffc1c1;">"google"</span>)) #'string&lt;)
+(<span style="color: #ffc1c1;">"coogle"</span> <span style="color: #ffc1c1;">"eoogle"</span> <span style="color: #ffc1c1;">"foogle"</span> <span style="color: #ffc1c1;">"ggogle"</span> <span style="color: #ffc1c1;">"gkogle"</span> <span style="color: #ffc1c1;">"gmogle"</span> <span style="color: #ffc1c1;">"gnogle"</span> <span style="color: #ffc1c1;">"goggle"</span>
+ <span style="color: #ffc1c1;">"gokgle"</span> <span style="color: #ffc1c1;">"gomgle"</span> <span style="color: #ffc1c1;">"gongle"</span> <span style="color: #ffc1c1;">"goocle"</span> <span style="color: #ffc1c1;">"gooele"</span> <span style="color: #ffc1c1;">"goofle"</span> <span style="color: #ffc1c1;">"googde"</span> <span style="color: #ffc1c1;">"googhe"</span>
+ <span style="color: #ffc1c1;">"googla"</span> <span style="color: #ffc1c1;">"googld"</span> <span style="color: #ffc1c1;">"googlg"</span> <span style="color: #ffc1c1;">"googlm"</span> <span style="color: #ffc1c1;">"googlu"</span> <span style="color: #ffc1c1;">"googme"</span> <span style="color: #ffc1c1;">"googne"</span> <span style="color: #ffc1c1;">"gooole"</span>
+ <span style="color: #ffc1c1;">"goowle"</span> <span style="color: #ffc1c1;">"ooogle"</span> <span style="color: #ffc1c1;">"woogle"</span>)
+</pre>
 </div>
-</div>
-<div id="outline-container-org87d14f2" class="outline-2">
-<h2 id="org87d14f2"><span class="section-number-2">2.</span> (sort (remove-if-not #'valid-domain (bit-flips "google")) #'string&lt;)</h2>
-<div class="outline-text-2" id="text-2">
-<p>
-("coogle" "eoogle" "foogle" "ggogle" "gkogle" "gmogle" "gnogle" "goggle"
- "gokgle" "gomgle" "gongle" "goocle" "gooele" "goofle" "googde" "googhe"
- "googla" "googld" "googlg" "googlm" "googlu" "googme" "googne" "gooole"
- "goowle" "ooogle" "woogle")
-#+end_src
-</p>
 
 <p>
 Absolutely all of those are registered. Couldn't be bothered to automate the
 WHOIS lookup so I did it manually. I tried some of the other top-visited
 domains, even tiktok. It's clear either these companies took the threat of
 bitsquatting seriously and registered them, or some other enterprising entities
-are actively registering them for whatever purposes.
+are actively registering them for whatever purposes. Maybe people just like me
+experimenting.
 </p>
-</div>
-</div>
 </div>
 <div id="postamble" class="status">
 <p class="date">Date: 2022-10-04</p>

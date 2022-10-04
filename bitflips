@@ -54,7 +54,7 @@ domain names have to be [[https://en.wikipedia.org/wiki/Punycode][punnycode-enco
 So what do the bit-flipped alternatives to .com look like?
 
 #+begin_src lisp
-* (sort (remove-if-not #'valid-domain (bit-flips "com")) #'string<)
+>> (sort (remove-if-not #'valid-domain (bit-flips "com")) #'string<)
 ("aom" "bom" "cgm" "ckm" "cmm" "cnm" "coe" "coi" "col" "coo" "gom" "kom" "som")
 #+end_src
 
@@ -65,7 +65,7 @@ Well I'm not too sure what it would take to register google.gom, so I think I'll
 stick to the domain name without the TLD.
 
 #+begin_src lisp
-* (sort (remove-if-not #'valid-domain (bit-flips "google")) #'string<)
+>> (sort (remove-if-not #'valid-domain (bit-flips "google")) #'string<)
 ("coogle" "eoogle" "foogle" "ggogle" "gkogle" "gmogle" "gnogle" "goggle"
  "gokgle" "gomgle" "gongle" "goocle" "gooele" "goofle" "googde" "googhe"
  "googla" "googld" "googlg" "googlm" "googlu" "googme" "googne" "gooole"

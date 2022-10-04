@@ -49,6 +49,12 @@ pre.src::before {
     color: #A1A6AA;
 }
 
+pre {
+    background-color: #002237;
+    border: none;
+    color: #A1A6AA;
+}
+
 h1, h2, h3, h4, h5, h6 {
     color: #CCCFD0;
 }
