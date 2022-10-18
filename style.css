@@ -76,3 +76,7 @@ a:active {
 li {
     margin: 0 0 3px 0;
 }
+
+.figure > p > img {
+	width: 60%;
+}

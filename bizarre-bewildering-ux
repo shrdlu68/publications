@@ -86,10 +86,11 @@ where the "OK" button on the window Sent is, so you'll end up clicking on it and
 it will disappear just as quickly as it appeared. For first-time users of
 SimToolKit and/or M-Pesa, this must all be very bewildering.
 
-If you're on Android, you most likey have been interrupted by a
-network-initiated USSD push. You could be reading, or scrolling through your
-preferred $SOCIAL_MEDIA, or about to call $EMERGENCY_NUMBER, when a window that
-looks like this will literally take over your phone.
+If you're on Android, you most likely have been interrupted by a
+network-initiated USSD push. You could be reading, or
+scrolling through your preferred $SOCIAL_MEDIA, or about to call
+$EMERGENCY_NUMBER, when a window that looks like this will literally take over
+your phone.
 
 #+CAPTION: Thanks
 #+NAME: prompt.png
@@ -97,7 +98,9 @@ looks like this will literally take over your phone.
 
 This one I initiated for illustration purpose. I get a bunch of these that claim
 I've subscribed to some service or some such nonsense. It's premium spam right
-in your face and there's nothing you can do about it.
+in your face and there's nothing you can do about it. Flash messages have
+similar behavior - they take over your phone and there's nothing you can do
+about it. Thankfully, I am yet to see them being abused commercially.
 
 It is not only impossible to ignore these windows, since they overlay anything
 else on your screen, but you also can't navigate away from it. You have to click
@@ -114,4 +117,6 @@ fields. So if there's someone behind you in line you have to try and turn your
 phone away to hide your PIN. Or a CCTV camera.
 
 If you get the number wrong, some other poor soul will probably get a window
-that will take over their phone. That's just the way it is[[https://www.youtube.com/watch?v=9obm__-OGdI][.]]
+that will take over their phone. That's just the way it is[[https://www.youtube.com/watch?v=9obm__-OGdI][.]] A friend of mine
+with a diabolical imagination points out that STK Push could be used for debt
+collection since there doesn't seem to be rate-limiting. ~while balance > 0:...~
