@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnwindProtect</title>
+<title>Playing detective</title>
 <meta name="author" content="Brian Kamotho" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -190,7 +190,7 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { width: 90%; }
+  .org-svg { }
 </style>
 <link rel="stylesheet" type="text/css" href="style.css" />
 <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
@@ -201,24 +201,117 @@
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">UnwindProtect</h1>
+<h1 class="title">Playing detective</h1>
 <p>
-Welcome, there isn't much here right now:
+I was minding my own business as usual, testing out a GQL server, when I
+encountered an error. A "helpful" log entry in my STDOUT went something like
+this:
 </p>
-<ul class="org-ul">
-<li>First post: <a href="https://unwindprotect.com/starting-somewhere">Starting somewhere</a></li>
-<li>Remember carriage returns? <a href="https://unwindprotect.com/awk-conundrum">An Awk conundrum</a></li>
-<li>Almost certainly a bad idea: <a href="https://unwindprotect.com/postgres-fdw">Datawarehousing using Postgres FDW</a></li>
-<li>Uncommon fun in Common Lisp: <a href="https://unwindprotect.com/constraint-programming">Exploring constraint programming with CL's Screamer</a></li>
-<li>Save you some time: <a href="https://unwindprotect.com/router-hitch">Router hitch-TKIP&amp;AES</a></li>
-<li>The requirements vs elegant specs: <a href="https://unwindprotect.com/gql-pagination">GraphQL pagination</a></li>
-<li>I'm sorry Dave, I can't let you do that: <a href="https://unwindprotect.com/cant-let-you">A GraphQL oddity</a></li>
-<li>Late to the game: <a href="https://unwindprotect.com/bitflips">Flippin' bits</a></li>
-<li>Forsaken tech: <a href="https://unwindprotect.com/bizarre-bewildering-ux.html">The Bizarre and Bewildering UX of Android's SimToolKit and USSD</a></li>
-</ul>
+<div class="org-src-container">
+<pre class="src src-json">{
+  <span style="color: #00ffff;">"level"</span>: <span style="color: #ffc1c1;">"error"</span>,
+  <span style="color: #00ffff;">"panic"</span>: <span style="color: #ffc1c1;">"reflect: call of reflect.Value.IsNil on string Value"</span>,
+  <span style="color: #00ffff;">"time"</span>: <span style="color: #8470ff; font-weight: bold;">1674143536</span>,
+  <span style="color: #00ffff;">"message"</span>: <span style="color: #ffc1c1;">"Panic at the Disco!"</span>
+}
+</pre>
+</div>
+
+<p>
+Quite helpful, wouldn't you say? The error message is explained by this section
+of the <a href="https://pkg.go.dev/reflect#Value.IsNil">docs</a>:
+</p>
+<blockquote>
+<p>
+IsNil reports whether its argument v is nil. The argument must be a chan, func,
+interface, map, pointer, or slice value; if it is not, IsNil panics. Note that
+IsNil is not always equivalent to a regular comparison with nil in Go. For
+example, if v was created by calling ValueOf with an uninitialized interface
+variable i, i==nil will be true but v.IsNil will panic as v will be the zero
+Value.
+</p>
+</blockquote>
+
+<p>
+Okay so far, only problem is - where exactly is this happening? Not anywhere in
+code I've written, a quick grep confirmed that. So of the 3 trillion
+dependencies and their sub-dependencies, which one is this error propagating
+from?
+</p>
+
+<p>
+If only there was a way to know. Some sort of&#x2026;stack trace? Wouldn't that be
+nice, if such a thing existed?
+</p>
+
+<p>
+The problem is: somewhere in the call stack, something is ~recover~ing, and then
+simply formatting the value given by the panic. No effort is made to retrieve
+the stack of the panic, so that valuable information is lost.
+</p>
+
+<p>
+The error message was certainly helpful - at least we're not entirely clueless
+about what's happening. But it would be nice to know <i>where</i> it's happening.
+</p>
+
+<p>
+Unfortunately in this case we have to play detective. Of the libraries I'm
+using, gqlgen and bun were the primary suspects. Initially, I thought I could
+find where the recover is being called and try and get the stack trace myself,
+but that looked like it'd be more work.
+</p>
+
+<p>
+Out of intuition, I started with bun - rightly so it turned out. I cloned the
+repo, checked out the release commit to match the version I was using, and
+updated my project's go.mod with this line:
+</p>
+<blockquote>
+<p>
+replace github.com/uptrace/bun v1.1.9 =&gt; /home/automaton/golang/bun
+</p>
+</blockquote>
+
+<p>
+Now in my local copy of bun, it was time to figure out where exactly IsNil was
+being called and causing a panic. I grepped the entire codebase for instances of
+"IsNil", then filtered out instances where it would be impossible to cause the
+panic, such as <code>if v.Kind() == reflect.Ptr &amp;&amp; v.IsNil()</code>.
+</p>
+
+<p>
+I <a href="https://buttondown.email/geoffreylitt/archive/starting-this-newsletter-print-debugging-byoc/">print-debugged</a> The remaining suspects, adding a line like this just before the
+suspected line:
+</p>
+<div class="org-src-container">
+<pre class="src src-go">fmt.<span style="color: #00fa9a; font-weight: bold;">Printf</span>(<span style="color: #ffc1c1;">"&lt;&lt;&lt;&lt;&lt;&lt;"</span>)
+dest.<span style="color: #00fa9a; font-weight: bold;">IsNil</span>()
+fmt.<span style="color: #00fa9a; font-weight: bold;">Printf</span>(<span style="color: #ffc1c1;">"&gt;&gt;&gt;&gt;&gt;&gt;\n"</span>)
+</pre>
+</div>
+
+<p>
+Successful calls would look like <code>&lt;&lt;&lt;&lt;&lt;&lt;&gt;&gt;&gt;&gt;&gt;&gt;</code>, and obviously for the
+unsuccessful ones we'd get a panic after printing <code>&lt;&lt;&lt;&lt;&lt;&lt;</code>.
+</p>
+
+<p>
+It worked, and I caught my the perpetrator. Case closed.
+</p>
+
+<p>
+But none of this detective work would have been necessary, if I had some sort of
+stacktrace. If the error turned out to be coming from gqlgen instead, I'd have
+had to do the same thing over again with gqlgen.
+</p>
+
+<p>
+Lesson learned? Please contextualize your error messages.
+</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-04-07</p>
+<p class="date">Date: 2023-01-20</p>
 <p class="author">Author: Brian Kamotho</p>
 </div>
 </body>
