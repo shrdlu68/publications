@@ -48,7 +48,7 @@ bad CL :D, forthwith:
 #+end_src
 
 Since a valid domain name has to be a subset of ascii (so unicode-containing
-domain names have to be [[https://en.wikipedia.org/wiki/Punycode][punnycode-encoded]]), we filter out anything that's not
+domain names have to be [[https://en.wikipedia.org/wiki/Punycode][punycode-encoded]]), we filter out anything that's not
 /[a-z0-9-]/, and yes we do that lazily with #'standard-char-p.
 
 So what do the bit-flipped alternatives to .com look like?

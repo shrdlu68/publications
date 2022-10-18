@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Flippin' bits</title>
+<title>The bizarre and bewildering UX of Android's SIM Toolkit and USSD</title>
 <meta name="author" content="Brian Kamotho" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,99 +197,170 @@
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href="https://unwindprotect.com/cant-let-you"> UP </a>
+ <a accesskey="h" href="https://unwindprotect.com/bitflips"> UP </a>
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">Flippin' bits</h1>
+<h1 class="title">The bizarre and bewildering UX of Android's SIM Toolkit and USSD</h1>
 <p>
-I got curious about what kind of traffic I would get by <a href="https://en.wikipedia.org/wiki/Bitsquatting">bitsquatting</a> some of the
-top-visited domain names (eg. google.com). It was also an excuse to write some
-bad CL :D, forthwith:
+<a href="https://en.wikipedia.org/wiki/M-Pesa">M-Pesa</a>, the world's <a href="https://www.safaricom.co.ke/media-center-landing/press-releases/m-pesa-africa-celebrates-50-million-active-customers">leading</a> mobile money service, has bizarre UX when you're
+using it on Android. This is nothing new, and users have adapted to the
+bewildering UX. Most Kenyans would relate to this, but they wouldn't see what
+the fuss of this blog post is all about.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-lisp">(<span style="color: #00ffff;">deftype</span> <span style="color: #63b8ff;">octet</span> ()
-  '(unsigned-byte 8))
+<p>
+Although there's an app on the playstore, most people still use <a href="https://en.wikipedia.org/wiki/SIM_Application_Toolkit">SimToolKit</a>
+(anecdotal claim) - probably because the app needs a working internet connection
+to function and SimToolKit comes pre-installed on the phone. When you're sending
+money or paying with M-Pesa using the SimToolKit, this is the sequence of events
+after you've input all the requisite details:
+</p>
 
-(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-weight: bold;">str-to-octets</span> (str)
-  (<span style="color: #00ffff;">let*</span> ((len (length str))
-         (octets (make-array len <span style="color: #b0c4de;">:element-type</span> 'octet)))
-    (<span style="color: #00ffff;">loop</span> for index from 0 below len
-          do (setf (aref octets index) (char-int (char str index))))
-    octets))
+<p>
+A window appears with the phone number/till number/pay bill details and the
+amount you're about to send. To proceed, one presses "OK". "CANCEL" cancels
+the transaction. We'll call this window "ConfirmNumber".
+</p>
 
-(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-weight: bold;">octets-to-str</span> (octets)
-  (<span style="color: #00ffff;">let*</span> ((len (length octets))
-         (str (make-string len)))
-    (<span style="color: #00ffff;">loop</span> for index from 0 below len
-          do (setf (aref str index) (code-char (aref octets index))))
-    str))
 
-(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-weight: bold;">bit-flips</span> (url)
-  (<span style="color: #00ffff;">let*</span> ((out-len (* (length url) 8))
-         (out (make-array out-len)))
-    (<span style="color: #00ffff;">loop</span> for index from 0 below out-len do
-          (setf (aref out index) (string-to-octets url)))
-    (<span style="color: #00ffff;">loop</span> for out-index from 0 below out-len
-          do (<span style="color: #00ffff;">multiple-value-bind</span> (char-index bit-index) (floor out-index 8)
-               (setf (ldb (byte 1 bit-index) (aref (aref out out-index) char-index))
-                     (<span style="color: #00ffff;">if</span> (equal (ldb (byte 1 bit-index) (aref (aref out out-index) char-index)) 0)
-                         1
-                         0))))
-    (map 'list #'octets-to-str out)))
-
-(<span style="color: #00ffff;">defun</span> <span style="color: #00fa9a; font-weight: bold;">valid-domain</span> (str)
-  (<span style="color: #00ffff;">loop</span> for letter across str always (and (lower-case-p letter) (standard-char-p letter))))
-</pre>
+<div id="orgdf9c6bf" class="figure">
+<p><img src="./media/ConfirmNumber.png" alt="ConfirmNumber.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>Confirming transaction number details</p>
 </div>
 
 <p>
-Since a valid domain name has to be a subset of ascii (so unicode-containing
-domain names have to be <a href="https://en.wikipedia.org/wiki/Punycode">punycode-encoded</a>), we filter out anything that's not
-<i>[a-z0-9-]</i>, and yes we do that lazily with #'standard-char-p.
+When you click "OK", the next window appears, we'll call this window "Sent":
 </p>
 
-<p>
-So what do the bit-flipped alternatives to .com look like?
-</p>
 
-<div class="org-src-container">
-<pre class="src src-lisp">&gt;&gt; (sort (remove-if-not #'valid-domain (bit-flips <span style="color: #ffc1c1;">"com"</span>)) #'string&lt;)
-(<span style="color: #ffc1c1;">"aom"</span> <span style="color: #ffc1c1;">"bom"</span> <span style="color: #ffc1c1;">"cgm"</span> <span style="color: #ffc1c1;">"ckm"</span> <span style="color: #ffc1c1;">"cmm"</span> <span style="color: #ffc1c1;">"cnm"</span> <span style="color: #ffc1c1;">"coe"</span> <span style="color: #ffc1c1;">"coi"</span> <span style="color: #ffc1c1;">"col"</span> <span style="color: #ffc1c1;">"coo"</span> <span style="color: #ffc1c1;">"gom"</span> <span style="color: #ffc1c1;">"kom"</span> <span style="color: #ffc1c1;">"som"</span>)
-</pre>
+<div id="org112091f" class="figure">
+<p><img src="./media/sent.png" alt="sent.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>Sent</p>
 </div>
 
 <p>
-I really miss Common Lisp, if only I could convince someone to pay me to write
-it. It'd be better than this I swear :D
+Whether you press "CANCEL" or "OK" at this point doesn't make a difference. Both
+options simply dismiss the window without actually doing anything. If you ignore
+it, you still get to the next step. Forebodingly, it does say "Wait for M-PESA
+to reply".
 </p>
 
 <p>
-Well I'm not too sure what it would take to register google.gom, so I think I'll
-stick to the domain name without the TLD.
+Next, a network-initiated USSD push causes a window to appear. We'll call this
+window "ConfirmName". The ConfirmName window overlays over the "Sent"
+window, if you hadn't dismissed it. In fact, because it's USSD, it overlays over
+everything and you can't do anything with your phone until you act on it. It
+practically acts as a lock screen. More on this later.
 </p>
 
-<div class="org-src-container">
-<pre class="src src-lisp">&gt;&gt; (sort (remove-if-not #'valid-domain (bit-flips <span style="color: #ffc1c1;">"google"</span>)) #'string&lt;)
-(<span style="color: #ffc1c1;">"coogle"</span> <span style="color: #ffc1c1;">"eoogle"</span> <span style="color: #ffc1c1;">"foogle"</span> <span style="color: #ffc1c1;">"ggogle"</span> <span style="color: #ffc1c1;">"gkogle"</span> <span style="color: #ffc1c1;">"gmogle"</span> <span style="color: #ffc1c1;">"gnogle"</span> <span style="color: #ffc1c1;">"goggle"</span>
- <span style="color: #ffc1c1;">"gokgle"</span> <span style="color: #ffc1c1;">"gomgle"</span> <span style="color: #ffc1c1;">"gongle"</span> <span style="color: #ffc1c1;">"goocle"</span> <span style="color: #ffc1c1;">"gooele"</span> <span style="color: #ffc1c1;">"goofle"</span> <span style="color: #ffc1c1;">"googde"</span> <span style="color: #ffc1c1;">"googhe"</span>
- <span style="color: #ffc1c1;">"googla"</span> <span style="color: #ffc1c1;">"googld"</span> <span style="color: #ffc1c1;">"googlg"</span> <span style="color: #ffc1c1;">"googlm"</span> <span style="color: #ffc1c1;">"googlu"</span> <span style="color: #ffc1c1;">"googme"</span> <span style="color: #ffc1c1;">"googne"</span> <span style="color: #ffc1c1;">"gooole"</span>
- <span style="color: #ffc1c1;">"goowle"</span> <span style="color: #ffc1c1;">"ooogle"</span> <span style="color: #ffc1c1;">"woogle"</span>)
-</pre>
+
+<div id="orga68a1a0" class="figure">
+<p><img src="./media/ConfirmName.png" alt="ConfirmName.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>Confirming transaction name details</p>
 </div>
 
 <p>
-Absolutely all of those are registered. Couldn't be bothered to automate the
-WHOIS lookup so I did it manually. I tried some of the other top-visited
-domains, even tiktok. It's clear either these companies took the threat of
-bitsquatting seriously and registered them, or some other enterprising entities
-are actively registering them for whatever purposes. Maybe people just like me
-experimenting.
+This window shows you the name of the person or business you're sending money to
+and the amount you're about to send/pay. If you cancel the transaction at this
+point, you get a text message that confirms the cancellation. The message
+states, in part: "Kindly note that if you cancel 5 times, you will be barred
+from using M-PESA". It also shows you your balance.
+</p>
+
+<p>
+ConfirmName has two buttons, "CANCEL" and "OK". The "CANCEL" button is
+absolutely useless at this point. All it does is dismiss the window, it doesn't
+actually cancel the transaction.
+</p>
+
+<p>
+To cancel the transaction, one sends "any letter or number" within 25 seconds -
+so you only need the "OK" button. If you don't want to cancel the transaction,
+you can press "OK" without any input or "CANCEL".
+</p>
+
+<p>
+Window ConfirmName sometimes appears so fast it overlays window Sent before you
+can interact with window Sent. Sometimes there's a bit of delay. Since it
+appears suddenly and overlays anything on your phone, sometimes you end up
+hitting "SEND" or "CANCEL" on window ConfirmName inadvertently when it appears
+just as you're about to tap something else (e.g on window Sent). When this
+happens to you several times, you have to train yourself to not tap your phone
+until window ConfirmName appears. That's just how it works.
+</p>
+
+<p>
+If you want to proceed with the transaction and you proceed by tapping either
+"CANCEL" or "SEND" without any input, window ConfirmName disappears. At this
+point you're back to window "Sent", if you hadn't gotten rid of it. So then you
+might want to click on "CANCEL" or "OK" on window Sent. But just as your finger
+is about to make contact, another window (we'll call it Thanks) will appear in a
+flash:
+</p>
+
+
+<div id="org30ac850" class="figure">
+<p><img src="./media/thanks.png" alt="thanks.png" />
+</p>
+<p><span class="figure-number">Figure 4: </span>Thanks</p>
+</div>
+
+<p>
+You can actually see that the "OK" button on this window is positioned almost
+where the "OK" button on the window Sent is, so you'll end up clicking on it and
+it will disappear just as quickly as it appeared. For first-time users of
+SimToolKit and/or M-Pesa, this must all be very bewildering.
+</p>
+
+<p>
+If you're on Android, you most likey have been interrupted by a
+network-initiated USSD push. You could be reading, or scrolling through your
+preferred $SOCIAL_MEDIA, or about to call $EMERGENCY_NUMBER, when a window that
+looks like this will literally take over your phone.
+</p>
+
+
+<div id="org70888eb" class="figure">
+<p><img src="./media/prompt.png " alt="prompt.png " />
+</p>
+<p><span class="figure-number">Figure 5: </span>Thanks</p>
+</div>
+
+<p>
+This one I initiated for illustration purpose. I get a bunch of these that claim
+I've subscribed to some service or some such nonsense. It's premium spam right
+in your face and there's nothing you can do about it.
+</p>
+
+<p>
+It is not only impossible to ignore these windows, since they overlay anything
+else on your screen, but you also can't navigate away from it. You have to click
+either "CANCEL" or "SEND". The user is forced to deal with this one window to
+move on with their life. If you press your home button or back button, your
+phone will act like it normally does, except all this will be happening behind
+the USSD prompt. In CSS speak, these windows always have the maximum <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/z-index">z-index</a>.
+</p>
+
+<p>
+A common use-case for network-initiated USSD push is STK Push, which some
+supermarkets use. They ask for your number, and you get a prompt where
+all you need to input is your PIN. Maddeningly, your PIN is visible in this
+window - I guess because there's no way for the UI to have hidden input
+fields. So if there's someone behind you in line you have to try and turn your
+phone away to hide your PIN. Or a CCTV camera.
+</p>
+
+<p>
+If you get the number wrong, some other poor soul will probably get a window
+that will take over their phone. That's just the way it is<a href="https://www.youtube.com/watch?v=9obm__-OGdI">.</a>
 </p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2022-10-04</p>
+<p class="date">Date: 2022-10-17</p>
 <p class="author">Author: Brian Kamotho</p>
 </div>
 </body>
