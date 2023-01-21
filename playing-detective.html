@@ -245,7 +245,7 @@ nice, if such a thing existed?
 </p>
 
 <p>
-The problem is: somewhere in the call stack, something is ~recover~ing, and then
+The problem is: somewhere in the call stack, something is recover()ing, and then
 simply formatting the value given by the panic. No effort is made to retrieve
 the stack of the panic, so that valuable information is lost.
 </p>
@@ -281,7 +281,7 @@ panic, such as <code>if v.Kind() == reflect.Ptr &amp;&amp; v.IsNil()</code>.
 </p>
 
 <p>
-I <a href="https://buttondown.email/geoffreylitt/archive/starting-this-newsletter-print-debugging-byoc/">print-debugged</a> The remaining suspects, adding a line like this just before the
+I <a href="https://buttondown.email/geoffreylitt/archive/starting-this-newsletter-print-debugging-byoc/">print-debugged</a> the remaining suspects, adding a line like this just before the
 suspected line:
 </p>
 <div class="org-src-container">
@@ -303,7 +303,7 @@ It worked, and I caught my the perpetrator. Case closed.
 <p>
 But none of this detective work would have been necessary, if I had some sort of
 stacktrace. If the error turned out to be coming from gqlgen instead, I'd have
-had to do the same thing over again with gqlgen.
+had to do the same thing over again with gqlgen, etc.
 </p>
 
 <p>

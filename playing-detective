@@ -39,7 +39,7 @@ from?
 If only there was a way to know. Some sort of...stack trace? Wouldn't that be
 nice, if such a thing existed?
 
-The problem is: somewhere in the call stack, something is ~recover~ing, and then
+The problem is: somewhere in the call stack, something is recover()ing, and then
 simply formatting the value given by the panic. No effort is made to retrieve
 the stack of the panic, so that valuable information is lost.
 
@@ -63,7 +63,7 @@ being called and causing a panic. I grepped the entire codebase for instances of
 "IsNil", then filtered out instances where it would be impossible to cause the
 panic, such as ~if v.Kind() == reflect.Ptr && v.IsNil()~.
 
-I [[https://buttondown.email/geoffreylitt/archive/starting-this-newsletter-print-debugging-byoc/][print-debugged]] The remaining suspects, adding a line like this just before the
+I [[https://buttondown.email/geoffreylitt/archive/starting-this-newsletter-print-debugging-byoc/][print-debugged]] the remaining suspects, adding a line like this just before the
 suspected line:
 #+begin_src go
   fmt.Printf("<<<<<<")
@@ -78,6 +78,6 @@ It worked, and I caught my the perpetrator. Case closed.
 
 But none of this detective work would have been necessary, if I had some sort of
 stacktrace. If the error turned out to be coming from gqlgen instead, I'd have
-had to do the same thing over again with gqlgen.
+had to do the same thing over again with gqlgen, etc.
 
 Lesson learned? Please contextualize your error messages.
