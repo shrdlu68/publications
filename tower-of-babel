@@ -1,0 +1,66 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: 
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: The Tower of Babel
+#+AUTHOR: Brian Kamotho
+#+DATE: 2023-02-07
+
+We're all familiar with the biblical story - God is menaced by the increasingly
+ambitious and sacrilegious engineering of the earthly.
+
+#+CAPTION: Many hills, Chyulu Hills National Park, Kenya
+#+NAME: hills.png
+[[./media/hills.png]]
+
+To retard the progress humans make (and punish them too perhaps), God unleashes
+a fractal curse in the form of multiple languages. We now have good enough
+automated language translation that the original story doesn't quite make sense
+anymore. In this day and age, a Tamashek-speaking person from Agadez would not
+have much trouble communicating with a Tuvan-speaking person from Kyzyl - as
+long as they're both equipped with a $30 android phone. If anything, the
+existence of many languages is a source of joy and amusement for people to
+delight in the aesthetics and quirks of languages.
+
+But we can use our imagination - replace many languages with many races,
+cultures, governments, political and economic doctrines, religions, clans,
+etc. For example, Somalia happens to be one of the most [[https://theface.com/archive/war-famine-and-drugs-behind-the-lines-in-somalia][culturally homogenous]]
+countries in Africa. Yet clanism has torn it apart. For Somalis, the tower
+of babel story is best told with clans in place of languages.
+
+For programmers, programming languages are a perfect replacement for natural
+languages in the retelling of the story. Most software is made of many layers of
+abstrations - like an onion. And programmers don't write their scripture on
+reels of papyrus either - the very tools they use to program are themselves
+programs.
+
+Whenever a new programming language is invented, a new onion has to be fabricated
+all over again nearly from the core. Sometimes bits can be reused, but there's
+still some bit of overhead. For example, the security most websites use is
+essentially the same layer in the onion - a library called OpenSSL written in C.
+
+Most other languages simply use C bindings of OpenSSL. And this applies to a few
+other libraries as well - usually graphics libraries, audio codecs,
+cryptographic primitives, and things that interface with the kernel such as I/O
+frameworks and networking libraries.
+
+Everything else has to be re-implemented. Package installers, popular data
+structures and algorithms, various parsers and lexers, web frameworks, regex
+parsers, ML algorithms, and countless other kinds of libraries.
+
+#+CAPTION: Standards, xkcd #927 - Randall Munroe
+#+NAME: Standards
+https://imgs.xkcd.com/comics/standards.png
+
+A mystical outcoming has shredded the digital world into a dizzying spectacle of
+multiple operating systems, javascript frameworks, package managers, linux
+distributions, shells, cloud environments, python versions, lisp dialects, C
+compilers, SQL dialects, browsers, mail servers, filesystems, document formats,
+social media sites, instant messaging platforms, wordpress plugins...
+
+In all the pandemonium, no one has had much time to do anything really
+sophisticated with software. And that generates a tremendous amount of
+amusement, busywork and gainful employment for many programmers from all walks
+of life all over the globe.
