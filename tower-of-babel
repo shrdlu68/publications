@@ -1,7 +1,7 @@
 # -*- mode: org; fill-column: 80 -*-
 #+OPTIONS: ^:nil timestamp:nil
 #+HTML_LINK_HOME: https://unwindprotect.com
-#+HTML_LINK_UP: 
+#+HTML_LINK_UP: https://unwindprotect.com/playing-detective
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
 #+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
 #+TITLE: The Tower of Babel
@@ -22,7 +22,7 @@ anymore. In this day and age, a Tamashek-speaking person from Agadez would not
 have much trouble communicating with a Tuvan-speaking person from Kyzyl - as
 long as they're both equipped with a $30 android phone. If anything, the
 existence of many languages is a source of joy and amusement for people to
-delight in the aesthetics and quirks of languages.
+[[https://www.youtube.com/watch?v=WHHGOYu6Fl0][delight]] in the aesthetics and quirks of languages.
 
 But we can use our imagination - replace many languages with many races,
 cultures, governments, political and economic doctrines, religions, clans,
@@ -33,7 +33,7 @@ of babel story is best told with clans in place of languages.
 For programmers, programming languages are a perfect replacement for natural
 languages in the retelling of the story. Most software is made of many layers of
 abstrations - like an onion. And programmers don't write their scripture on
-reels of papyrus either - the very tools they use to program are themselves
+reels of papyrus either - the very tools of the trade are themselves
 programs.
 
 Whenever a new programming language is invented, a new onion has to be fabricated
@@ -58,9 +58,10 @@ A mystical outcoming has shredded the digital world into a dizzying spectacle of
 multiple operating systems, javascript frameworks, package managers, linux
 distributions, shells, cloud environments, python versions, lisp dialects, C
 compilers, SQL dialects, browsers, mail servers, filesystems, document formats,
-social media sites, instant messaging platforms, wordpress plugins...
+social media sites, instant messaging platforms, wordpress plugins, device
+drivers...
 
-In all the pandemonium, no one has had much time to do anything really
+In all the pandemonium, few people have had the time to do anything really
 sophisticated with software. And that generates a tremendous amount of
 amusement, busywork and gainful employment for many programmers from all walks
 of life all over the globe.
