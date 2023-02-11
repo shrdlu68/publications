@@ -1,0 +1,120 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/tower-of-babel
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Useless use of Stack
+#+AUTHOR: Brian Kamotho
+#+DATE: 2023-02-11
+
+The title is modelled, obviously, after the notorious [[https://en.wikipedia.org/wiki/Cat_(Unix)#Useless_use_of_cat][useless use of cat]].
+
+Consider the following FizzBuzz challenge:
+#+begin_quote
+Given a string s containing just the characters '(', ')', '{', '}', '[' and ']',
+determine if the input string is valid.
+
+An input string is valid if:
+
+Open brackets must be closed by the same type of brackets.
+Open brackets must be closed in the correct order.
+Example 1:
+
+Input: s = "()"
+Output: true
+Example 2:
+
+Input: s = "()[]{}"
+Output: true
+Example 3:
+
+Input: s = "(]"
+Output: false
+#+end_quote
+
+My first instinct is to use a counter. A commonly contrived solution is to use a
+stack.
+
+A Stack solution would look something like this:
+#+begin_src go
+type Stack struct {
+	store []interface{}
+}
+
+func (s *Stack) push(obj interface{}) {
+	s.store = append(s.store, obj)
+}
+
+func (s *Stack) pop() (interface{}, bool) {
+	if len(s.store) == 0 {
+		return nil, false
+	}
+	last := len(s.store) - 1
+	ret := s.store[last]
+	s.store = s.store[:last]
+	return ret, true
+}
+
+func isBalancedAll(inp string) bool {
+	parensStack := Stack{}
+	angleStack := Stack{}
+	curlyStack := Stack{}
+
+	for i := 0; i < len(inp); i++ {
+		char := inp[i]
+
+		switch char {
+		// Angle
+		case '[':
+			angleStack.push('[')
+		case ']':
+			_, found := angleStack.pop()
+			if !found {
+				return false
+			}
+		// Parens
+		case '(':
+			parensStack.push('(')
+		case ')':
+			_, found := parensStack.pop()
+			if !found {
+				return false
+			}
+		// Curly
+		case '{':
+			curlyStack.push('{')
+		case '}':
+			_, found := curlyStack.pop()
+			if !found {
+				return false
+			}
+		}
+	}
+
+	stacks := []Stack{angleStack, parensStack, curlyStack}
+	for i := 0; i < len(stacks); i++ {
+		_, found := stacks[i].pop()
+		if found {
+			return false
+		}
+	}
+	return true
+}
+#+end_src
+
+The stack solution is a solution in search of a problem. This could very easily
+be a counter. We're pushing to the stack(++), popping(--), and checking for
+emptiness(==0). We're not even interested in ordering - the stack can only ever
+contain one type of thing at any given moment, all we care for is the count. In
+fact, we could use a queue - FIFO access. And all we'd care about is whether or
+not the queue is empty.
+
+In my opinion, the stack's /raison d'etre/ is LIFO access. A consequence of LIFO
+access is that one essentially trasverses items in reverse while popping the
+stack. Hence the use of the stack to evaluate arithmetic expressions in order to
+observe precedence rules. Or while converting decimal to binary and so
+forth. These use-cases specifically need LIFO access.
+
+Some other uses, such as the one above, are painfully contrived. And a horrible
+choice of example when teaching the stack.

@@ -5,7 +5,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UnwindProtect</title>
+<title>Useless use of Stack</title>
 <meta name="author" content="Brian Kamotho" />
 <meta name="generator" content="Org Mode" />
 <style>
@@ -197,31 +197,151 @@
 </head>
 <body>
 <div id="org-div-home-and-up">
- <a accesskey="h" href=""> UP </a>
+ <a accesskey="h" href="https://unwindprotect.com/tower-of-babel"> UP </a>
  |
  <a accesskey="H" href="https://unwindprotect.com"> HOME </a>
 </div><div id="content" class="content">
-<h1 class="title">UnwindProtect</h1>
+<h1 class="title">Useless use of Stack</h1>
 <p>
-Welcome, there isn't much here right now:
+The title is modelled, obviously, after the notorious <a href="https://en.wikipedia.org/wiki/Cat_(Unix)#Useless_use_of_cat">useless use of cat</a>.
 </p>
-<ul class="org-ul">
-<li>First post: <a href="https://unwindprotect.com/starting-somewhere">Starting somewhere</a></li>
-<li>Remember carriage returns? <a href="https://unwindprotect.com/awk-conundrum">An Awk conundrum</a></li>
-<li>Almost certainly a bad idea: <a href="https://unwindprotect.com/postgres-fdw">Datawarehousing using Postgres FDW</a></li>
-<li>Uncommon fun in Common Lisp: <a href="https://unwindprotect.com/constraint-programming">Exploring constraint programming with CL's Screamer</a></li>
-<li>Save you some time: <a href="https://unwindprotect.com/router-hitch">Router hitch-TKIP&amp;AES</a></li>
-<li>The requirements vs elegant specs: <a href="https://unwindprotect.com/gql-pagination">GraphQL pagination</a></li>
-<li>I'm sorry Dave, I can't let you do that: <a href="https://unwindprotect.com/cant-let-you">A GraphQL oddity</a></li>
-<li>Late to the game: <a href="https://unwindprotect.com/bitflips">Flippin' bits</a></li>
-<li>Forsaken tech: <a href="https://unwindprotect.com/bizarre-bewildering-ux.html">The Bizarre and Bewildering UX of Android's SimToolKit and USSD</a></li>
-<li>An error, a hint, a trail: <a href="https://unwindprotect.com/playing-detective">Playing detective</a></li>
-<li>Where do software programming jobs come from? <a href="https://unwindprotect.com/tower-of-babel">The Tower of Babel</a></li>
-<li>Meet the Don Quixote of FizzBuzz: <a href="https://unwindprotect.com/useless-use-of-stack">Useless use of stack</a></li>
-</ul>
+
+<p>
+Consider the following FizzBuzz challenge:
+</p>
+<blockquote>
+<p>
+Given a string s containing just the characters '(', ')', '{', '}', '[' and ']',
+determine if the input string is valid.
+</p>
+
+<p>
+An input string is valid if:
+</p>
+
+<p>
+Open brackets must be closed by the same type of brackets.
+Open brackets must be closed in the correct order.
+Example 1:
+</p>
+
+<p>
+Input: s = "()"
+Output: true
+Example 2:
+</p>
+
+<p>
+Input: s = "()[]{}"
+Output: true
+Example 3:
+</p>
+
+<p>
+Input: s = "(]"
+Output: false
+</p>
+</blockquote>
+
+<p>
+My first instinct is to use a counter. A commonly contrived solution is to use a
+stack.
+</p>
+
+<p>
+A Stack solution would look something like this:
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #00ffff;">type</span> <span style="color: #63b8ff;">Stack</span> <span style="color: #00ffff;">struct</span> {
+    store []<span style="color: #00ffff;">interface</span>{}
+}
+
+<span style="color: #00ffff;">func</span> (<span style="color: #7fffd4;">s</span> *<span style="color: #63b8ff;">Stack</span>) <span style="color: #00fa9a; font-weight: bold;">push</span>(<span style="color: #7fffd4;">obj</span> <span style="color: #00ffff;">interface</span>{}) {
+    s.store = <span style="color: #b0c4de;">append</span>(s.store, obj)
+}
+
+<span style="color: #00ffff;">func</span> (<span style="color: #7fffd4;">s</span> *<span style="color: #63b8ff;">Stack</span>) <span style="color: #00fa9a; font-weight: bold;">pop</span>() (<span style="color: #00ffff;">interface</span>{}, <span style="color: #63b8ff;">bool</span>) {
+    <span style="color: #00ffff;">if</span> <span style="color: #b0c4de;">len</span>(s.store) == 0 {
+        <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">nil</span>, <span style="color: #8470ff; font-weight: bold;">false</span>
+    }
+    <span style="color: #7fffd4;">last</span> := <span style="color: #b0c4de;">len</span>(s.store) - 1
+    <span style="color: #7fffd4;">ret</span> := s.store[last]
+    s.store = s.store[:last]
+    <span style="color: #00ffff;">return</span> ret, <span style="color: #8470ff; font-weight: bold;">true</span>
+}
+
+<span style="color: #00ffff;">func</span> <span style="color: #00fa9a; font-weight: bold;">isBalancedAll</span>(<span style="color: #7fffd4;">inp</span> <span style="color: #63b8ff;">string</span>) <span style="color: #63b8ff;">bool</span> {
+    <span style="color: #7fffd4;">parensStack</span> := <span style="color: #63b8ff;">Stack</span>{}
+    <span style="color: #7fffd4;">angleStack</span> := <span style="color: #63b8ff;">Stack</span>{}
+    <span style="color: #7fffd4;">curlyStack</span> := <span style="color: #63b8ff;">Stack</span>{}
+
+    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">i</span> := 0; i &lt; <span style="color: #b0c4de;">len</span>(inp); i++ {
+        <span style="color: #7fffd4;">char</span> := inp[i]
+
+        <span style="color: #00ffff;">switch</span> char {
+        <span style="color: #fa8072;">// </span><span style="color: #ff7f24; font-style: italic;">Angle</span>
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">'['</span>:
+            angleStack.<span style="color: #00fa9a; font-weight: bold;">push</span>(<span style="color: #ffc1c1;">'['</span>)
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">']'</span>:
+            <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := angleStack.<span style="color: #00fa9a; font-weight: bold;">pop</span>()
+            <span style="color: #00ffff;">if</span> !found {
+                <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">false</span>
+            }
+        <span style="color: #fa8072;">// </span><span style="color: #ff7f24; font-style: italic;">Parens</span>
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">'('</span>:
+            parensStack.<span style="color: #00fa9a; font-weight: bold;">push</span>(<span style="color: #ffc1c1;">'('</span>)
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">')'</span>:
+            <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := parensStack.<span style="color: #00fa9a; font-weight: bold;">pop</span>()
+            <span style="color: #00ffff;">if</span> !found {
+                <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">false</span>
+            }
+        <span style="color: #fa8072;">// </span><span style="color: #ff7f24; font-style: italic;">Curly</span>
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">'{'</span>:
+            curlyStack.<span style="color: #00fa9a; font-weight: bold;">push</span>(<span style="color: #ffc1c1;">'{'</span>)
+        <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">'}'</span>:
+            <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := curlyStack.<span style="color: #00fa9a; font-weight: bold;">pop</span>()
+            <span style="color: #00ffff;">if</span> !found {
+                <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">false</span>
+            }
+        }
+    }
+
+    <span style="color: #7fffd4;">stacks</span> := []<span style="color: #63b8ff;">Stack</span>{angleStack, parensStack, curlyStack}
+    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">i</span> := 0; i &lt; <span style="color: #b0c4de;">len</span>(stacks); i++ {
+        <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := stacks[i].<span style="color: #00fa9a; font-weight: bold;">pop</span>()
+        <span style="color: #00ffff;">if</span> found {
+            <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">false</span>
+        }
+    }
+    <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">true</span>
+}
+</pre>
+</div>
+
+<p>
+The stack solution is a solution in search of a problem. This could very easily
+be a counter. We're pushing to the stack(++), popping(&#x2013;), and checking for
+emptiness(==0). We're not even interested in ordering - the stack can only ever
+contain one type of thing at any given moment, all we care for is the count. In
+fact, we could use a queue - FIFO access. And all we'd care about is whether or
+not the queue is empty.
+</p>
+
+<p>
+In my opinion, the stack's <i>raison d'etre</i> is LIFO access. A consequence of LIFO
+access is that one essentially trasverses items in reverse while popping the
+stack. Hence the use of the stack to evaluate arithmetic expressions in order to
+observe precedence rules. Or while converting decimal to binary and so
+forth. These use-cases specifically need LIFO access.
+</p>
+
+<p>
+Some other uses, such as the one above, are painfully contrived. And a horrible
+choice of example when teaching the stack.
+</p>
 </div>
 <div id="postamble" class="status">
-<p class="date">Date: 2021-04-07</p>
+<p class="date">Date: 2023-02-11</p>
 <p class="author">Author: Brian Kamotho</p>
 </div>
 </body>
