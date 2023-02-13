@@ -61,9 +61,7 @@ func isBalancedAll(inp string) bool {
 	angleStack := Stack{}
 	curlyStack := Stack{}
 
-	for i := 0; i < len(inp); i++ {
-		char := inp[i]
-
+	for _, char := range inp {
 		switch char {
 		// Angle
 		case '[':
@@ -92,9 +90,8 @@ func isBalancedAll(inp string) bool {
 		}
 	}
 
-	stacks := []Stack{angleStack, parensStack, curlyStack}
-	for i := 0; i < len(stacks); i++ {
-		_, found := stacks[i].pop()
+	for _, stack := range []Stack{angleStack, parensStack, curlyStack} {
+		_, found := stack.pop()
 		if found {
 			return false
 		}
