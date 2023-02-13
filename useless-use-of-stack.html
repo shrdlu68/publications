@@ -275,9 +275,7 @@ A Stack solution would look something like this:
     <span style="color: #7fffd4;">angleStack</span> := <span style="color: #63b8ff;">Stack</span>{}
     <span style="color: #7fffd4;">curlyStack</span> := <span style="color: #63b8ff;">Stack</span>{}
 
-    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">i</span> := 0; i &lt; <span style="color: #b0c4de;">len</span>(inp); i++ {
-        <span style="color: #7fffd4;">char</span> := inp[i]
-
+    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">char</span> := <span style="color: #00ffff;">range</span> inp {
         <span style="color: #00ffff;">switch</span> char {
         <span style="color: #fa8072;">// </span><span style="color: #ff7f24; font-style: italic;">Angle</span>
         <span style="color: #00ffff;">case</span> <span style="color: #ffc1c1;">'['</span>:
@@ -306,9 +304,8 @@ A Stack solution would look something like this:
         }
     }
 
-    <span style="color: #7fffd4;">stacks</span> := []<span style="color: #63b8ff;">Stack</span>{angleStack, parensStack, curlyStack}
-    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">i</span> := 0; i &lt; <span style="color: #b0c4de;">len</span>(stacks); i++ {
-        <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := stacks[i].<span style="color: #00fa9a; font-weight: bold;">pop</span>()
+    <span style="color: #00ffff;">for</span> <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">stack</span> := <span style="color: #00ffff;">range</span> []<span style="color: #63b8ff;">Stack</span>{angleStack, parensStack, curlyStack} {
+        <span style="color: #7fffd4;">_</span>, <span style="color: #7fffd4;">found</span> := stack.<span style="color: #00fa9a; font-weight: bold;">pop</span>()
         <span style="color: #00ffff;">if</span> found {
             <span style="color: #00ffff;">return</span> <span style="color: #8470ff; font-weight: bold;">false</span>
         }
