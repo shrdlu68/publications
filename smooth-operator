@@ -1,0 +1,71 @@
+# -*- mode: org; fill-column: 80 -*-
+#+OPTIONS: ^:nil timestamp:nil
+#+HTML_LINK_HOME: https://unwindprotect.com
+#+HTML_LINK_UP: https://unwindprotect.com/useless-use-of-stack
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style.css" />
+#+HTML_HEAD: <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono&display=swap" rel="stylesheet">
+#+TITLE: Smooth operator
+#+AUTHOR: Brian Kamotho
+#+DATE: 2023-02-13
+
+Forthwith:
+#+begin_src go
+package main
+
+import "fmt"
+
+func foo() (int, error) {
+	return 10, nil
+}
+
+func main() {
+	dict := make(map[string]int)
+	dict["foo"] = 10
+
+	// Valid
+	fmt.Printf("Foo: %d\n", dict["foo"])
+	// Also valid
+	val, exists := dict["foo"]
+	fmt.Printf("Foo: %d, exists: %v\n", val, exists)
+	// Invalid
+	fmt.Printf("Foo: %d\n", foo())
+	// Valid
+	val, err := foo()
+	fmt.Printf("Foo: %d, error: %v\n", val, err)
+}
+#+end_src
+
+Why does the map access operator get special treatment? It returns multiple
+values, but you're allowed to pretend it doesn't.
+
+If you try the same thing with a function call, you get an error like
+~multiple-value foo() (value of type (int, error)) in single-value context~
+
+One could imagine a user-defined map that has similar semantics, or something
+like a stack:
+#+begin_src go
+type Stack struct {
+	store []interface{}
+}
+
+func (s *Stack) push(obj interface{}) {
+	s.store = append(s.store, obj)
+}
+
+func (s *Stack) pop() (interface{}, bool) {
+	if len(s.store) == 0 {
+		return nil, false
+	}
+	last := len(s.store) - 1
+	ret := s.store[last]
+	s.store = s.store[:last]
+	return ret, true
+}
+#+end_src
+
+Here, you can't just ~foo.pop()~ and pretend that it returns only one value, you
+have to use the ~val, _ := foo.pop()~ semantics.  It's the exact same use-case -
+I should be able to ignore the second return value here if I want to. So why
+impose this restriction?
+
+I'd love to know what the rationale behind this was.
